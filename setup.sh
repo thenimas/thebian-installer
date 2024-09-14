@@ -86,6 +86,10 @@ for i in /dev /dev/pts /proc /sys /sys/firmware/efi/efivars /run; do mount --bin
 chroot /target /bin/bash << EOT
 export PS1="(chroot) ${PS1}"
 
+# Import keyboard settings
+service keyboard-setup restart
+udevadm trigger --subsystem-match=input --action=change
+
 # Remove unneeded files
 rm -r /etc/apt/sources.list.d/*
 
@@ -135,7 +139,7 @@ apt install codium syncthing -yy
 
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
-flatpak install com.github.PintaProject.Pinta com.github.tchx84.Flatseal com.gluonhq.SceneBuilder com.obsproject.Studio com.spotify.Client dev.vencord.Vesktop org.kde.krita org.libreoffice.LibreOffice org.mozilla.Thunderbird org.mozilla.firefox -y
+flatpak install com.github.PintaProject.Pinta com.github.tchx84.Flatseal com.gluonhq.SceneBuilder com.obsproject.Studio dev.vencord.Vesktop org.kde.krita org.libreoffice.LibreOffice org.mozilla.Thunderbird org.mozilla.firefox -y
 
 # setup grub
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/desktop-grub.png -O /boot/grub/desktop-grub.png
