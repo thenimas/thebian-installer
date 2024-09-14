@@ -1,4 +1,7 @@
 #!/bin/bash
+exec 3>&1 4>&2
+trap 'exec 2>&4 1>&3' 0 1 2 3
+exec 1>log.txt 2>&1
 
 if [ ! -d /target/ ]; then
     echo "Directory /target/ not found. Did you partition properly?"
@@ -35,6 +38,12 @@ echo "Checking dpeendencies..."
 apt install --no-install-recommends fdisk rsync btrfs-progs neofetch
 
 neofetch
+
+mkdir -p /target/etc
+# Generate fstab (if it doesn't exist)
+if [ ! -d /target/etc/fstab ]; then
+    cat /proc/mounts | grep target | sed -e 's/ \/target / \/ /g' | sed -e 's/\/target\//\//g' > /target/etc/fstab
+fi
 
 cd /target
 mkdir /target/_install

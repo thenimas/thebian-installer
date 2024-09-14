@@ -5,7 +5,9 @@ This script is intended to be run from a live environment, preferably a cloud im
 https://cloud.debian.org/images/cloud/
 
 ## Usage
-The disks being installed to still need to be partitioned manually. This can be done in any reasonable configuration, as long as there is a partition for /boot/efi. This configuration only supports EFI booting. The fstab file must also be configured manually.
+The disks being installed to still need to be partitioned manually. This can be done in any reasonable configuration, as long as there is a partition for /boot/efi. This configuration only supports EFI booting.
+
+The script will generate an fstab file for you if you don't make one manually.
 
 An auto-partitioning script may be added in the future.
 
