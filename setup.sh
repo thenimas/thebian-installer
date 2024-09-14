@@ -44,7 +44,7 @@ sleep 1
 mount /dev/loop0p1 /target/_install
 
 # Extract image to the new drive
-rsync -auxv --ignore-existing /target/_install/* /target/
+rsync -auxv --ignore-existing --exclude 'lost+found' /target/_install/* /target/
 
 # Remove temporary files
 umount _install/
@@ -72,7 +72,6 @@ chroot /target /bin/bash << EOT
 export PS1="(chroot) ${PS1}"
 
 # Remove unneeded files
-rm -rf lost+found/
 rm -r /etc/apt/sources.list.d/*
 
 # make user
