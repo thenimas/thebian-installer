@@ -113,8 +113,11 @@ mkdir -p /home/"$newUser"/.config/i3
 mkdir -p /home/"$newUser"/.config/autostart
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/config -O /home/"$newUser"/.config/i3/config
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/i3status.conf -O /home/"$newUser"/.config/i3/i3status.conf
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/.Xresources -O /home/"$newUser"/.Xresources
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/flatpak-update.desktop -O /home/"$newUser"/.config/autostart/flatpak-update.desktop
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/refsheet_wallpaper.png -O /home/"$newUser"/refsheet_wallpaper.png
+
+chown "$newUser":"$newUser" /home/"$newUser" -R
 
 # extra non-repository packages
 

@@ -1,0 +1,6 @@
+URxvt*foreground: white
+URxvt*depth: 32
+URxvt*background: rgba:0000/0000/0000/c800
+
+URxvt*transparent: true
+URxvt*shading: 20
