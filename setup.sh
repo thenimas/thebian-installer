@@ -116,7 +116,7 @@ apt update
 apt upgrade -yy
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc neofetch nitrogen nano cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget keyboard-configuration- -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc neofetch nitrogen nano cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget task-ssh-server keyboard-configuration- -yy
 
 # Downloading configs
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
@@ -153,6 +153,17 @@ echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://ap
 
 apt update
 apt install codium syncthing -yy
+
+# add firewall rules
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow 80
+ufw allow 443
+ufw limit 22/tcp
+ufw allow syncthing
+ufw enable
+
+# add flatpaks last (because they're weird)
 
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
