@@ -8,6 +8,8 @@ fi
 
 read -p "Enter username: " newUser
 
+# Removed password (will prompt user to make one on startup instead)
+: '
 newPassWord="__PLACEHOLDER__"
 confirmPassWord=""
 
@@ -22,7 +24,7 @@ do
         echo "Passwords do not match."
         echo ""
     fi
-done
+done '
 
 read -p "Enter hostname: " newHostname
 echo ""
@@ -102,7 +104,10 @@ rm -r /etc/apt/sources.list.d/*
 # make user
 useradd -m -s /bin/bash "$newUser"
 usermod -aG sudo "$newUser"
-echo "$newUser":"$newPassword" | chpasswd
+# echo "$newUser":"$newPassword" | chpasswd
+
+# expire users password (so they'll be prompted to make one on login)
+passwd -e "$newUser"
 
 # adding data we specified
 ln -sf /usr/share/zoneinfo/Canada/Eastern /etc/localtime
