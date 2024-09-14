@@ -17,4 +17,4 @@ An auto-partitioning script may be added in the future.
 4. The script will prompt for a username, password and hostname. After that, the setup will run without any further input needed.
 5. The script will prompt once the installation is complete, and the machine can then be restarted.
 
-The installation requires about 10GB of free space and takes about 30 minutes on a good internet connection.
+The installation requires about 10GB of free space and takes about 15-30 minutes on a good internet connection.
