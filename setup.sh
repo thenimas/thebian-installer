@@ -138,6 +138,10 @@ grub-install --target=x86_64-efi --removable
 update-grub2
 update-initramfs -u -k all
 
+# disable root account
+passwd -d root
+passwd -l root
+
 EOT
 
 echo ""
