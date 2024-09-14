@@ -90,8 +90,9 @@ export PS1="(chroot) ${PS1}"
 rm -r /etc/apt/sources.list.d/*
 
 # make user
-useradd -mp "$newPassword" "$newUser"
+useradd -m -s /bin/bash "$newUser"
 usermod -aG sudo "$newUser"
+echo "$newUser":"$newPassword" | chpasswd
 
 # adding data we specified
 ln -sf /usr/share/zoneinfo/Canada/Eastern /etc/localtime
@@ -117,6 +118,7 @@ wget https://github.com/thenimas/thebian-installer/raw/main/configs/.Xresources 
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/flatpak-update.desktop -O /home/"$newUser"/.config/autostart/flatpak-update.desktop
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/refsheet_wallpaper.png -O /home/"$newUser"/refsheet_wallpaper.png
 
+sudo -u "$newUser" bash -c 'nitrogen /home/"$newUser"/refsheet_wallpaper.png'
 chown "$newUser":"$newUser" /home/"$newUser" -R
 
 # extra non-repository packages
