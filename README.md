@@ -10,7 +10,7 @@ The disks being installed to still need to be partitioned manually. This can be 
 An auto-partitioning script may be added in the future.
 
 1. Create a folder (if it doesn't exist) named /target/, and mount the root to it. Make sure the EFI partition is also mounted at /target/boot/efi.
-2. Download the script to your live environment (`wget https://github.com/thenimas/thebian-installer/raw/main/setup.sh`)
+2. Download the script to your live environment (`wget github.com/thenimas/thebian-installer/raw/main/setup.sh`)
 3. Give it executing priveleges (`chmod +x setup.sh`) and run the script.
 4. The script will prompt for a username, password and hostname. After that, the setup will run without any further input needed.
 5. The script will prompt once the installation is complete, and the machine can then be restarted.
