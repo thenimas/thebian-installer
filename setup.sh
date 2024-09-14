@@ -29,8 +29,10 @@ echo ""
 
 echo "Installation is starting..."
 echo ""
+sleep 1
 
-apt install --no-install-recommends fdisk rsync btrfs-progs neofetch -y > /dev/null
+echo "Checking dpeendencies..."
+apt install --no-install-recommends fdisk rsync btrfs-progs neofetch
 
 neofetch
 
