@@ -52,7 +52,7 @@ losetup -D
 rmdir _install/
 rm debian-12-nocloud-amd64-daily.raw
 
-# Source.list setup
+# Adding necessary cfgs
 sourcescfg="# Thebian installer sources list
 
 deb http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware
@@ -65,6 +65,19 @@ deb http://deb.debian.org/debian/ bookworm-updates main contrib non-free non-fre
 deb-src http://deb.debian.org/debian/ bookworm-updates main contrib non-free non-free-firmware
 "
 echo "$sourcescfg" > /target/etc/apt/sources.list
+
+keyboardcfg = "# KEYBOARD CONFIGURATION FILE
+
+# Consult the keyboard(5) manual page.
+
+XKBMODEL="pc105"
+XKBLAYOUT="us"
+XKBVARIANT=""
+XKBOPTIONS=""
+
+BACKSPACE="guess"
+"
+echo "$keyboardcfg" > /target/etc/default/keyboard
 
 # Chroot into the new installation
 for i in /dev /dev/pts /proc /sys /sys/firmware/efi/efivars /run; do mount --bind $i /target$i; done
@@ -92,7 +105,6 @@ apt upgrade -yy
 apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc neofetch nitrogen nano cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget -yy
 
 # Downloading configs
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/keyboard -O /etc/default/keyboard
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
 
 mkdir -p /home/"$newUser"/.config/i3
