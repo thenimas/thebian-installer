@@ -134,6 +134,16 @@ wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/re
 sudo -u "$newUser" bash -c 'nitrogen /home/"$newUser"/refsheet_wallpaper.png'
 chown "$newUser":"$newUser" /home/"$newUser" -R
 
+# setup grub
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/desktop-grub.png -O /boot/grub/desktop-grub.png
+grub-install --target=x86_64-efi --removable
+update-grub2
+update-initramfs -u -k all
+
+# disable root account
+passwd -d root
+passwd -l root
+
 # extra non-repository packages
 
 wget -qO - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg | gpg --dearmor | dd of=/usr/share/keyrings/vscodium-archive-keyring.gpg
@@ -149,16 +159,6 @@ apt install codium syncthing -yy
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
 flatpak install com.github.PintaProject.Pinta com.github.tchx84.Flatseal com.gluonhq.SceneBuilder com.obsproject.Studio dev.vencord.Vesktop org.kde.krita org.libreoffice.LibreOffice org.mozilla.Thunderbird org.mozilla.firefox -y
-
-# setup grub
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/desktop-grub.png -O /boot/grub/desktop-grub.png
-grub-install --target=x86_64-efi --removable
-update-grub2
-update-initramfs -u -k all
-
-# disable root account
-passwd -d root
-passwd -l root
 
 EOT
 
