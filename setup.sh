@@ -117,7 +117,7 @@ apt install codium syncthing -yy
 
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
-flatpak install com.github.PintaProject.Pinta com.github.tchx84.Flatseal com.gluonhq.SceneBuilder com.obsproject.Studio com.spotify.Client dev.vencord.Vesktop org.kde.krita org.libreoffice.LibreOffice org.mozilla.Thunderbird org.mozilla.firefox
+flatpak install com.github.PintaProject.Pinta com.github.tchx84.Flatseal com.gluonhq.SceneBuilder com.obsproject.Studio com.spotify.Client dev.vencord.Vesktop org.kde.krita org.libreoffice.LibreOffice org.mozilla.Thunderbird org.mozilla.firefox -y
 
 # setup grub
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/desktop-grub.png -O /boot/grub/desktop-grub.png
