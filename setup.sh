@@ -97,6 +97,10 @@ export PS1="(chroot) ${PS1}"
 # Remove unneeded files
 rm -r /etc/apt/sources.list.d/*
 
+# Adding nameservers
+rm /etc/resolv.conf
+echo "nameserver 1.1.1.1" > /etc/resolv.conf
+
 # make user
 useradd -m -s /bin/bash "$newUser"
 usermod -aG sudo "$newUser"
