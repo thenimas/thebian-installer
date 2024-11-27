@@ -49,9 +49,10 @@ mkdir /target/_install
 
 # Download the latest debian system image
 wget https://cloud.debian.org/images/cloud/bookworm/daily/latest/debian-12-nocloud-amd64-daily.raw
-losetup -f -P debian-12-nocloud-amd64-daily.raw
-sleep 1
-mount /dev/loop0p1 /target/_install
+# losetup -f -P --loop-ref loop_climg debian-12-nocloud-amd64-daily.raw
+# sleep 1
+# mount /dev/loop_climg /target/_install
+mount -o loop debian-12-nocloud-amd64-daily.raw /target/_install
 
 # Extract image to the new drive
 rsync -auxv --ignore-existing --exclude 'lost+found' /target/_install/* /target/
@@ -121,16 +122,14 @@ apt update
 apt upgrade -yy
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc neofetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget task-ssh-server systemsettings lxappearance systemd-zram-generator -yy
-
-echo "zram-size = ram / 4" >> /etc/systemd/zram-generator.conf
-echo "compression-algorithm = zstd" >> /etc/systemd/zram-generator.conf
-
-systemctl daemon-reload
-systemctl start /dev/zram0
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc neofetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget task-ssh-server systemsettings systemd-zram-generator lxappearance -yy
 
 # Downloading configs
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/zram-generator.conf -O /etc/default/zram-generator.conf
+
+systemctl daemon-reload
+systemctl start /dev/zram0
 
 mkdir -p /home/"$newUser"/.config/i3
 mkdir -p /home/"$newUser"/.config/autostart
@@ -156,7 +155,7 @@ passwd -l root
 # extra non-repository packages
 
 wget -qO - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg | gpg --dearmor | dd of=/usr/share/keyrings/vscodium-archive-keyring.gpg
-echo 'deb [ signed-by=/usr/share/keyrings/vscodium-archive-keyring.gpg ] https://download.vscodium.com/debs vscodium main' | sudo tee /etc/apt/sources.list.d/vscodium.list
+echo 'deb [ arch=amd64 signed-by=/usr/share/keyrings/vscodium-archive-keyring.gpg ] https://download.vscodium.com/debs vscodium main' | sudo tee /etc/apt/sources.list.d/vscodium.list
 
 sudo mkdir -p /etc/apt/keyrings
 curl -L -o /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg
