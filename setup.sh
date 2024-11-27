@@ -58,7 +58,7 @@ rsync -auxv --ignore-existing --exclude 'lost+found' /target/_install/* /target/
 
 # Remove temporary files
 umount _install/
-losetup -D
+losetup -D /dev/loop99
 rmdir _install/
 rm debian-12-nocloud-amd64-daily.raw
 
