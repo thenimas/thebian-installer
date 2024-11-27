@@ -49,10 +49,9 @@ mkdir /target/_install
 
 # Download the latest debian system image
 wget https://cloud.debian.org/images/cloud/bookworm/daily/latest/debian-12-nocloud-amd64-daily.raw
-# losetup -f -P --loop-ref loop_climg debian-12-nocloud-amd64-daily.raw
-# sleep 1
-# mount /dev/loop_climg /target/_install
-mount -o loop debian-12-nocloud-amd64-daily.raw /target/_install
+losetup -f -P --loop-ref loop_climg debian-12-nocloud-amd64-daily.raw
+sleep 1
+mount /dev/loop_climg /target/_install
 
 # Extract image to the new drive
 rsync -auxv --ignore-existing --exclude 'lost+found' /target/_install/* /target/
