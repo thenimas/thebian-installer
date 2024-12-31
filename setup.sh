@@ -44,6 +44,10 @@ if [ ! -d /target/etc/fstab ]; then
     cat /proc/mounts | grep target | sed -e 's/ \/target / \/ /g' | sed -e 's/\/target\//\//g' > /target/etc/fstab
 fi
 
+echo "tmpfs /tmp tmpfs rw,nodev,nosuid,size=2G 0 0" > /target/etc/fstab
+echo "tmpfs /var/tmp tmpfs rw,nodev,nosuid,size=2G 0 0" > /target/etc/fstab
+echo "tmpfs /var/cache tmpfs rw,nodev,nosuid,size=2G 0 0" > /target/etc/fstab
+
 cd /target
 mkdir /target/_install
 
