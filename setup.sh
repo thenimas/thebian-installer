@@ -108,11 +108,6 @@ echo "nameserver 1.1.1.1" > /etc/resolv.conf
 # make user
 useradd -m -s /bin/bash "$newUser"
 usermod -aG sudo "$newUser"
-# echo "$newUser":"$newPassword" | chpasswd
-
-# expire users password (so they'll be prompted to make one on login)
-passwd -d "$newUser"
-passwd -e "$newUser"
 
 # adding data we specified
 ln -sf /usr/share/zoneinfo/Canada/Eastern /etc/localtime
@@ -142,7 +137,7 @@ wget https://github.com/thenimas/thebian-installer/raw/main/configs/.Xresources 
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/flatpak-update.desktop -O /home/"$newUser"/.config/autostart/flatpak-update.desktop
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/refsheet_wallpaper.png -O /home/"$newUser"/refsheet_wallpaper.png
 
-sudo -u "$newUser" bash -c 'nitrogen /home/"$newUser"/refsheet_wallpaper.png'
+# sudo -u "$newUser" bash -c 'nitrogen /home/"$newUser"/refsheet_wallpaper.png'
 chown "$newUser":"$newUser" /home/"$newUser" -R
 
 # setup grub
@@ -154,6 +149,10 @@ update-initramfs -u -k all
 # disable root account
 passwd -d root
 passwd -l root
+
+# expire users password (so they'll be prompted to make one on login)
+passwd -d "$newUser"
+passwd -e "$newUser"
 
 # extra non-repository packages
 
@@ -175,12 +174,6 @@ ufw allow 443
 ufw limit 22/tcp
 ufw allow syncthing
 ufw enable
-
-# add flatpaks last (because they're weird)
-
-flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-
-# flatpak install com.github.PintaProject.Pinta com.github.tchx84.Flatseal com.gluonhq.SceneBuilder com.obsproject.Studio dev.vencord.Vesktop org.kde.krita org.libreoffice.LibreOffice org.mozilla.Thunderbird org.mozilla.firefox -y
 
 EOT
 
