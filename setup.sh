@@ -8,26 +8,16 @@ fi
 
 read -p "Enter username: " newUser
 
-# Removed password (will prompt user to make one on startup instead)
-: '
-newPassWord="__PLACEHOLDER__"
-confirmPassWord=""
-
-until [ "$newPassWord" == "$confirmPassWord" ]
-do
-    read -sp "Enter password: " newPassWord
-    echo ""
-    read -sp "Confirm password: " confirmPassWord
-    echo ""
-    if [ "$newPassWord" != "$confirmPassWord" ]
-    then
-        echo "Passwords do not match."
-        echo ""
-    fi
-done '
+choice="n"
+additionalPackages=""
 
 read -p "Enter hostname: " newHostname
 echo ""
+
+read -p "Add additonal packages? (y/n): " choice
+if [ $choice = "y" ]; then
+    read -p "Specify packages: " additonalPackages
+fi
 
 echo "Installation is starting..."
 echo ""
@@ -121,6 +111,8 @@ apt upgrade -yy
 
 # installing packages
 apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc neofetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget task-ssh-server systemsettings systemd-zram-generator lxappearance -yy
+
+apt install "$additionalPackages" -yy
 
 # Downloading configs
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
