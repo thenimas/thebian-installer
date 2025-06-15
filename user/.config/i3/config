@@ -64,6 +64,12 @@ bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 # .desktop file. It is a wrapper around dmenu, so you need that installed.
 # bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
 
+# change focus
+# bindsym $mod+j focus left
+# bindsym $mod+k focus down
+# bindsym $mod+l focus up
+# bindsym $mod+semicolon focus right
+
 # alternatively, you can use the cursor keys:
 bindsym $mod+Shift+Left focus left
 bindsym $mod+Shift+Down focus down
@@ -219,7 +225,7 @@ bindsym $mod+Shift+Print exec --no-startup-id maim --select | xclip -selection c
 bindsym $mod+l exec --no-startup-id i3lock
 
 ## Sleep keybind
-bindsym $mod+Shift+s exec systemctl suspend
+bindsym $mod+Shift+s exec --no-startup-id systemctl suspend
 
 ## File manager hotkey
 bindsym $mod+Tab exec --no-startup-id thunar

@@ -24,15 +24,9 @@ echo ""
 sleep 1
 
 echo "Checking dpeendencies..."
-apt install --no-install-recommends fdisk rsync btrfs-progs neofetch
+apt install --no-install-recommends fdisk rsync btrfs-progs neofetch tar
 
 neofetch
-
-mkdir -p /target/etc
-# Generate fstab (if it doesn't exist)
-if [ ! -d /target/etc/fstab ]; then
-    cat /proc/mounts | grep target | sed -e 's/ \/target / \/ /g' | sed -e 's/\/target\//\//g' > /target/etc/fstab
-fi
 
 echo "tmpfs /tmp tmpfs rw,nodev,nosuid,size=2G 0 0" > /target/etc/fstab
 echo "tmpfs /var/tmp tmpfs rw,nodev,nosuid,size=2G 0 0" > /target/etc/fstab
@@ -49,6 +43,9 @@ mount /dev/loop99p1 /target/_install
 
 # Extract image to the new drive
 rsync -auxv --ignore-existing --exclude 'lost+found' /target/_install/* /target/
+
+# Add fstab entries
+cat /proc/mounts | grep target | sed -e 's/ \/target / \/ /g' | sed -e 's/\/target\//\//g' >> /target/etc/fstab
 
 # Remove temporary files
 umount _install/
@@ -92,7 +89,6 @@ export PS1="(chroot) ${PS1}"
 rm -r /etc/apt/sources.list.d/*
 
 # Adding nameservers
-rm /etc/resolv.conf
 echo "nameserver 1.1.1.1" > /etc/resolv.conf
 
 # make user
@@ -109,8 +105,10 @@ dpkg --add-architecture i386
 apt update
 apt upgrade -yy
 
+apt purge "*cloud*" -yy
+
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc neofetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget task-ssh-server systemsettings systemd-zram-generator lxappearance -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc neofetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget task-ssh-server systemsettings systemd-zram-generator lxappearance grub-efi-amd64 initramfs-tools -yy
 
 apt install "$additionalPackages" -yy
 
@@ -121,22 +119,19 @@ wget https://github.com/thenimas/thebian-installer/raw/main/configs/zram-generat
 systemctl daemon-reload
 systemctl start /dev/zram0
 
-mkdir -p /home/"$newUser"/.config/i3
-mkdir -p /home/"$newUser"/.config/autostart
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/config -O /home/"$newUser"/.config/i3/config
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/i3status.conf -O /home/"$newUser"/.config/i3/i3status.conf
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/.Xresources -O /home/"$newUser"/.Xresources
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/flatpak-update.desktop -O /home/"$newUser"/.config/autostart/flatpak-update.desktop
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/refsheet_wallpaper.png -O /home/"$newUser"/refsheet_wallpaper.png
+wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O /home/"$newUser"/user.tar
+tar -xf user.tar
+mv ./user/* ./user/.* ./
+rmdir user/
+rm user.tar
 
-# sudo -u "$newUser" bash -c 'nitrogen /home/"$newUser"/refsheet_wallpaper.png'
 chown "$newUser":"$newUser" /home/"$newUser" -R
 
 # setup grub
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/desktop-grub.png -O /boot/grub/desktop-grub.png
 grub-install --target=x86_64-efi --removable
 update-grub2
-update-initramfs -u -k all
+update-initramfs -u
 
 # disable root account
 passwd -d root
