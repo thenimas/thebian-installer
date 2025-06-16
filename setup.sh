@@ -77,9 +77,6 @@ BACKSPACE="guess"
 "
 echo "$keyboardcfg" > /target/etc/default/keyboard
 
-# Add fstab entries
-cat /proc/mounts | grep target | sed -e 's/ \/target / \/ /g' | sed -e 's/\/target\//\//g' >> /target/etc/fstab
-
 # Chroot into the new installation
 for i in /dev /dev/pts /proc /sys /sys/firmware/efi/efivars /run; do mount --bind $i /target$i; done
 chroot /target /bin/bash << EOT
@@ -100,6 +97,11 @@ usermod -aG sudo "$newUser"
 ln -sf /usr/share/zoneinfo/Canada/Eastern /etc/localtime
 echo "$newHostname" > /etc/hostname
 hwclock --systohc
+
+# adding locale
+echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+locale-gen
+
 
 # updating apt...
 dpkg --add-architecture i386
@@ -127,6 +129,9 @@ rmdir user/
 rm user.tar
 
 chown "$newUser":"$newUser" /home/"$newUser" -R
+
+# Add fstab entries
+cat /proc/mounts | grep -v nosuid  >> /etc/fstab
 
 # setup grub
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/desktop-grub.png -O /boot/grub/desktop-grub.png
