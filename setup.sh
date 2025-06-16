@@ -125,9 +125,9 @@ wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/gr
 systemctl daemon-reload
 systemctl start /dev/zram0
 
-wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O /home/"$newUser"/user.tar
+wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
 tar -xf user.tar
-rsync -a ./user/ ./
+rsync -a ./user /home/"$newUser"/
 rm -r user
 rm user.tar
 
