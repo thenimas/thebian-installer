@@ -44,9 +44,6 @@ mount /dev/loop99p1 /target/_install
 # Extract image to the new drive
 rsync -auxv --ignore-existing --exclude 'lost+found' /target/_install/* /target/
 
-# Add fstab entries
-cat /proc/mounts | grep target | sed -e 's/ \/target / \/ /g' | sed -e 's/\/target\//\//g' >> /target/etc/fstab
-
 # Remove temporary files
 umount _install/
 losetup -D /dev/loop99
@@ -79,6 +76,9 @@ XKBOPTIONS=""
 BACKSPACE="guess"
 "
 echo "$keyboardcfg" > /target/etc/default/keyboard
+
+# Add fstab entries
+cat /proc/mounts | grep target | sed -e 's/ \/target / \/ /g' | sed -e 's/\/target\//\//g' >> /target/etc/fstab
 
 # Chroot into the new installation
 for i in /dev /dev/pts /proc /sys /sys/firmware/efi/efivars /run; do mount --bind $i /target$i; done
