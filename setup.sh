@@ -111,13 +111,16 @@ apt upgrade -yy
 apt purge "*cloud*" -yy
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc neofetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget task-ssh-server systemsettings systemd-zram-generator lxappearance grub-efi-amd64 initramfs-tools -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc neofetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget task-ssh-server systemsettings systemd-zram-generator lxappearance grub-efi-amd64 initramfs-tools sox libsox-fmt-all -yy
 
 apt install "$additionalPackages" -yy
 
 # Downloading configs
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/zram-generator.conf -O /etc/default/zram-generator.conf
+
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-full.png -O /boot/grub/grub-full.png
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-wide.png -O /boot/grub/grub-wide.png
 
 systemctl daemon-reload
 systemctl start /dev/zram0
@@ -134,7 +137,6 @@ chown "$newUser":"$newUser" /home/"$newUser" -R
 cat /proc/mounts | grep -v nosuid  >> /etc/fstab
 
 # setup grub
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/desktop-grub.png -O /boot/grub/desktop-grub.png
 grub-install --target=x86_64-efi --removable
 update-grub2
 update-initramfs -u
@@ -157,7 +159,8 @@ curl -L -o /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net
 echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | sudo tee /etc/apt/sources.list.d/syncthing.list
 
 apt update
-apt install codium syncthing -yy
+apt install syncthing -yy
+apt install codium -yy
 
 # add firewall rules
 ufw default deny incoming
