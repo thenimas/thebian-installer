@@ -171,6 +171,8 @@ ufw limit 22/tcp
 ufw allow syncthing
 ufw enable
 
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
 EOT
 
 echo ""

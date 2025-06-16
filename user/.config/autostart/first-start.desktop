@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=First Start
+Comment=Userspace setup scripts for first boot.
+Exec=/bin/bash ~/first_start.sh
+Type=Application
+Terminal=false
+Hidden=false
