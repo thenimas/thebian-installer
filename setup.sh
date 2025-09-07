@@ -36,8 +36,8 @@ cd /target
 mkdir /target/_install
 
 # Download the latest debian system image
-wget https://cloud.debian.org/images/cloud/bookworm/daily/latest/debian-12-nocloud-amd64-daily.raw
-losetup -P /dev/loop99 debian-12-nocloud-amd64-daily.raw
+wget https://cloud.debian.org/images/cloud/trixie/daily/latest/debian-13-nocloud-amd64-daily.raw
+losetup -P /dev/loop99 debian-13-nocloud-amd64-daily.raw
 sleep 1
 mount /dev/loop99p1 /target/_install
 
@@ -48,19 +48,19 @@ rsync -auxv --ignore-existing --exclude 'lost+found' /target/_install/* /target/
 umount _install/
 losetup -D /dev/loop99
 rmdir _install/
-rm debian-12-nocloud-amd64-daily.raw
+rm debian-13-nocloud-amd64-daily.raw
 
 # Adding necessary cfgs
 sourcescfg="# Thebian installer sources list
 
-deb http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian/ bookworm main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian/ trixie main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian/ trixie main contrib non-free non-free-firmware
 
-deb http://security.debian.org/debian-security bookworm-security main contrib non-free  non-free-firmware
-deb-src http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+deb http://security.debian.org/debian-security trixie-security main contrib non-free  non-free-firmware
+deb-src http://security.debian.org/debian-security trixie-security main contrib non-free non-free-firmware
 
-deb http://deb.debian.org/debian/ bookworm-updates main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian/ bookworm-updates main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-firmware
+deb-src http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-firmware
 "
 echo "$sourcescfg" > /target/etc/apt/sources.list
 
