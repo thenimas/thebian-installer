@@ -28,10 +28,6 @@ apt install --no-install-recommends fdisk rsync btrfs-progs neofetch tar
 
 neofetch
 
-echo "tmpfs /tmp tmpfs rw,nodev,nosuid,size=2G 0 0" > /target/etc/fstab
-echo "tmpfs /var/tmp tmpfs rw,nodev,nosuid,size=2G 0 0" > /target/etc/fstab
-echo "tmpfs /var/cache tmpfs rw,nodev,nosuid,size=2G 0 0" > /target/etc/fstab
-
 cd /target
 mkdir /target/_install
 
@@ -63,6 +59,10 @@ deb http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-
 deb-src http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-firmware
 "
 echo "$sourcescfg" > /target/etc/apt/sources.list
+
+echo "tmpfs /tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
+echo "tmpfs /var/tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
+echo "tmpfs /var/cache tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
 
 keyboardcfg = "# KEYBOARD CONFIGURATION FILE
 
