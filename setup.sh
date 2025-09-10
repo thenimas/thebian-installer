@@ -31,6 +31,13 @@ neofetch
 cd /target
 mkdir /target/_install
 
+# Make dummy files
+mkdir -p /target/etc/apt
+mkdir -p /target/etc/default
+touch /target/etc/fstab
+touch /target/etc/apt/sources.list
+touch /target/etc/default/keyboard
+
 # Download the latest debian system image
 wget https://cloud.debian.org/images/cloud/trixie/daily/latest/debian-13-nocloud-amd64-daily.raw
 losetup -P /dev/loop99 debian-13-nocloud-amd64-daily.raw
