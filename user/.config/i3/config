@@ -50,7 +50,7 @@ floating_modifier $mod
 tiling_drag modifier titlebar
 
 # start a terminal
-bindsym $mod+Return exec --no-startup-id urxvt -hold -e bash -c "neofetch && exec bash"
+bindsym $mod+Return exec --no-startup-id urxvt -hold -e bash -c "fastfetch && exec bash"
 # --font 'xft:Noto Sans Mono Black:size=8' 
 
 # kill focused window
