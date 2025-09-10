@@ -134,7 +134,8 @@ systemctl start /dev/zram0
 
 wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
 tar -xf user.tar
-rsync -a ./user /home/"$newUser"/
+rsync -a ./user/* /home/"$newUser"/
+rsync -a ./user/.* /home/"$newUser"/
 rm -r user
 rm user.tar
 
