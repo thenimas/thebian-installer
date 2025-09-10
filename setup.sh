@@ -80,14 +80,14 @@ echo "nameserver $gateway" >> /target/etc/resolv.conf
 echo "nameserver 1.1.1.1" >> /target/etc/resolv.conf
 echo "nameserver 8.8.8.8" >> /target/etc/resolv.conf
 
-resolvcfg = "            nameservers:
+resolvcfg="            nameservers:
                 addresses:
                   - 1.1.1.1
                   - 8.8.8.8"
 
 echo "$resolvcfg" >> /target/etc/netplan/90-default.yaml
 
-keyboardcfg = "# KEYBOARD CONFIGURATION FILE
+keyboardcfg="# KEYBOARD CONFIGURATION FILE
 
 # Consult the keyboard(5) manual page.
 
