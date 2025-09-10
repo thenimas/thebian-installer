@@ -65,7 +65,7 @@ deb-src http://security.debian.org/debian-security trixie-security main contrib 
 deb http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-firmware
 deb-src http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-firmware
 "
-echo "$sourcescfg" > /target/etc/apt/sources.list
+echo "$sourcescfg" >> /target/etc/apt/sources.list
 
 echo "tmpfs /tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
 echo "tmpfs /var/tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
@@ -82,7 +82,7 @@ XKBOPTIONS=""
 
 BACKSPACE="guess"
 "
-echo "$keyboardcfg" > /target/etc/default/keyboard
+echo "$keyboardcfg" >> /target/etc/default/keyboard
 
 # Chroot into the new installation
 for i in /dev /dev/pts /proc /sys /sys/firmware/efi/efivars /run; do mount --bind $i /target$i; done
