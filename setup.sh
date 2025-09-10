@@ -92,6 +92,15 @@ export PS1="(chroot) ${PS1}"
 # Remove unneeded files
 rm -r /etc/apt/sources.list.d/*
 
+# updating apt...
+dpkg --add-architecture i386
+apt update
+apt upgrade -yy
+
+apt purge "*cloud*" -yy
+
+apt install locales util-linux-extra -yy
+
 # Adding nameservers
 rm /etc/resolv.conf
 echo "nameserver 1.1.1.1" > /etc/resolv.conf
@@ -108,14 +117,6 @@ hwclock --systohc
 # adding locale
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
-
-
-# updating apt...
-dpkg --add-architecture i386
-apt update
-apt upgrade -yy
-
-apt purge "*cloud*" -yy
 
 # installing packages
 apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc fastfetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget task-ssh-server systemsettings systemd-zram-generator lxappearance grub-efi-amd64 initramfs-tools sox libsox-fmt-all -yy
