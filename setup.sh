@@ -155,7 +155,7 @@ rm user.tar
 chown "$newUser":"$newUser" /home/"$newUser" -R
 
 # Add fstab entries
-cat /proc/mounts | grep -v nosuid > /etc/fstab
+cat /proc/mounts | grep -v nosuid >> /etc/fstab
 
 # setup grub
 grub-install --target=x86_64-efi --removable
