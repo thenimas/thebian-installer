@@ -71,11 +71,14 @@ echo "tmpfs /tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
 echo "tmpfs /var/tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
 echo "tmpfs /var/cache tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
 
-# rm /target/etc/resolv.conf
-# touch /target/etc/resolv.conf
-# cat /etc/resolv.conf >> /target/etc/resolv.conf
-# echo "nameserver 1.1.1.1" >> /target/etc/resolv.conf
-# echo "nameserver 8.8.8.8" >> /target/etc/resolv.conf
+rm /target/etc/resolv.conf
+touch /target/etc/resolv.conf
+
+gateway="$(ip r | awk '/^def/{print $3}')"
+
+echo "nameserver $gateway" >> /target/etc/resolv.conf
+echo "nameserver 1.1.1.1" >> /target/etc/resolv.conf
+echo "nameserver 8.8.8.8" >> /target/etc/resolv.conf
 
 resolvcfg = "            nameservers:
                 addresses:
