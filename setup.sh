@@ -71,6 +71,19 @@ echo "tmpfs /tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
 echo "tmpfs /var/tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
 echo "tmpfs /var/cache tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
 
+# rm /target/etc/resolv.conf
+# touch /target/etc/resolv.conf
+# cat /etc/resolv.conf >> /target/etc/resolv.conf
+# echo "nameserver 1.1.1.1" >> /target/etc/resolv.conf
+# echo "nameserver 8.8.8.8" >> /target/etc/resolv.conf
+
+resolvcfg = "            nameservers:
+                addresses:
+                  - 1.1.1.1
+                  - 8.8.8.8"
+
+echo "$resolvcfg" >> /target/etc/netplan/90-default.yaml
+
 keyboardcfg = "# KEYBOARD CONFIGURATION FILE
 
 # Consult the keyboard(5) manual page.
@@ -100,10 +113,6 @@ apt upgrade -yy
 apt purge "*cloud*" -yy
 
 apt install locales util-linux-extra -yy
-
-# Adding nameservers
-rm /etc/resolv.conf
-echo "nameserver 1.1.1.1" > /etc/resolv.conf
 
 # make user
 useradd -m -s /bin/bash "$newUser"
