@@ -13,7 +13,7 @@ https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/
 ## Requirements
 - A 64-bit Intel or AMD CPU
 - At least 2GB of available RAM
-- 10GB of disk space
+- 12GB of disk space
 - UEFI Booting
 - A valid internet connection (for the installation)
 
