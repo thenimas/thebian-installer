@@ -22,6 +22,8 @@ The disks being installed to still need to be partitioned and formatted manually
 
 I recommend formatting the main partition with BTRFS, creating a root subvolume (`btrfs subvol create /target/@`) and remounting with the switch `-o subvol=/@`. This will ensure you can take full advantage of Timeshift for snapshotting.
 
+If your root partition is in a LUKS encrypted volume, you will need to specify the additional package `cryptsetup-initramfs` and manually set up a crypttab.
+
 The script will generate an fstab file for you.
 
 1. Create a folder (if it doesn't exist) named /target/, and mount the root to it. Make sure the EFI partition is also mounted at /target/boot/efi.
