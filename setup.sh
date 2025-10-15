@@ -165,7 +165,7 @@ cat /proc/mounts | grep -v nosuid >> /etc/fstab
 
 # setup grub
 
-ll --target=x86_64-efi --removable
+grub-install --target=x86_64-efi --removable
 update-grub2
 update-initramfs -u
 
