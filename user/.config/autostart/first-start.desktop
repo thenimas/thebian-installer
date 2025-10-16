@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=First Start
 Comment=Userspace setup scripts for first boot.
-Exec=/bin/bash ~/first_start.sh
+Exec=/bin/nitrogen ~/Desktop/ && rm ~/.config/autostart/first-start.desktop
 Type=Application
 Terminal=false
 Hidden=false

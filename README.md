@@ -5,31 +5,31 @@ This script is intended to be run from a live environment. I recommend the Debia
 https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/
 
 ## Features
-- (Mostly) no input required for the installation
+- Automated installation with encryption support
 - i3 Window Manager preconfigured with my preferred bindings and visual configuration
 - Preinstalled utilites for coding, file syncing and snapshotting.
 - Support for up-to-date applications via Flatpak.
 
-## Requirements
-- A 64-bit Intel or AMD CPU
-- At least 2GB of available RAM
-- 12GB of disk space
-- UEFI Booting
-- A valid internet connection (for the installation)
+## Minimum Requirements
+- 64-bit Intel or AMD CPU
+- 2GB of available RAM
+- 8GB of disk space 
+  - (32GB recommended for at least a few applications)
+- UEFI/GPT Booting
+- Valid internet connection (for the installation)
 
 ## Usage
-The disks being installed to still need to be partitioned and formatted manually. This can be done in any reasonable configuration, as long as there is a partition for /boot/efi.
+The script simply can be downloaded and run as root.
+`wget github.com/thenimas/thebian-installer/raw/main/setup.sh`
 
-I recommend formatting the main partition with BTRFS, creating a root subvolume (`btrfs subvol create /target/@`) and remounting with the switch `-o subvol=/@`. This will ensure you can take full advantage of Timeshift for snapshotting.
+You will be given three options for the installation:
+```
+1. Install Debian to disk formatted with LUKS encryption (recommended)
+2. Install Debian without encryption
+3. Manual install to /target (advanced)
+```
+Encryption is recommended for security, but you have the option to just have a normal BTRFS filesystem for instances where this is not needed (i.e virtual machines.)
 
-If your root partition is in a LUKS encrypted volume, you will need to specify the additional package `cryptsetup-initramfs` and manually set up a crypttab.
-
-The script will generate an fstab file for you.
-
-1. Create a folder (if it doesn't exist) named /target/, and mount the root to it. Make sure the EFI partition is also mounted at /target/boot/efi.
-2. Download the script to your live environment (`wget github.com/thenimas/thebian-installer/raw/main/setup.sh`)
-3. Give it executing priveleges (`chmod +x setup.sh`) and run the script.
-4. The script will prompt for a username, password and hostname. After that, the setup will run.
-5. The script will prompt once the installation is complete, and the machine can then be restarted.
+Manually installing to /target is primarily for when a specific partitioning setup is needed (RAID, dual booting, etc). The partition needs to be mounted at /target and with a valid partition at /target/boot/efi. Note that you must configure fstab manually.
 
 The installation takes about 15-30 minutes on a good internet connection.
