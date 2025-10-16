@@ -368,6 +368,7 @@ fi
 
 systemctl disable NetworkManager-wait-online.service 
 systemctl disable systemd-networkd-wait-online.service
+systemctl mask systemd-networkd-wait-online.service
 
 if [ "$INSTALL_TYPE" != 2 ]; then
     apt install cryptsetup cryptsetup-bin cryptsetup-initramfs -yy
