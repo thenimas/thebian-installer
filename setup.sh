@@ -109,7 +109,7 @@ else
         done
     fi
 
-    IS_HDD=/sys/block/$installDisk/queue/rotational
+    IS_HDD="$(cat /sys/block/$installDisk/queue/rotational)"
 
     echo "Beginning installation..."
 
@@ -233,11 +233,12 @@ EEOF
 
     if [ "$INSTALL_TYPE" == 1 ]; then
         touch /target/etc/crypttab
+        crpytline="$CRYPT_NAME UUID=$CRYPT_UUID none luks"
         if [ "$IS_HDD" == 0 ]; then
-            echo "$CRYPT_NAME UUID=$CRYPT_UUID none luks,discard" >> /target/etc/crypttab
-        else 
-            echo "$CRYPT_NAME UUID=$CRYPT_UUID none luks" >> /target/etc/crypttab
+            cryptline="$CRYPT_NAME UUID=$CRYPT_UUID none luks,discard" >> /target/etc/crypttab
         fi
+
+        echo $cryptline | tr -d '\n'  >> /target/etc/crypttab
     fi
 
     mkdir -p /target/boot
@@ -366,6 +367,7 @@ if lshw -class network | grep -q "wireless"; then
 fi
 
 systemctl disable NetworkManager-wait-online.service 
+systemctl disable systemd-networkd-wait-online.service
 
 if [ "$INSTALL_TYPE" != 2 ]; then
     apt install cryptsetup cryptsetup-bin cryptsetup-initramfs -yy
