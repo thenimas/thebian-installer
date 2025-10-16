@@ -234,6 +234,10 @@ bindsym $mod+Tab exec --no-startup-id thunar
 bindsym XF86AudioPlay exec --no-startup-id playerctl play
 bindsym XF86AudioPause exec --no-startup-id playerctl pause
 
+## Brightness hotkeys (for laptops)
+# bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl s +10%
+# bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl s 10%-
+
 ## Show background
 exec --no-startup-id nitrogen --restore
 
