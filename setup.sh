@@ -431,13 +431,15 @@ apt autoremove -yy
 
 EOT
 
+cd ~/
+
 for i in /dev/pts /dev /proc /sys/firmware/efi/efivars /sys /run /boot/efi /boot /home /var/log / ; do 
     umount /target$i
 done
 
 if [ "$INSTALL_TYPE" == 1 ]; then
     cryptsetup close /dev/mapper/$CRYPT_NAME
-done
+fi
 
 echo ""
 echo "Installation complete! Your system is ready to reboot."
