@@ -351,16 +351,16 @@ echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
 
 # adding locale
-# echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
-# locale-gen
+echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+locale-gen
 
-update-locale "LANG=en_US.UTF-8"
-locale-gen --purge "en_US.UTF-8"
-dpkg-reconfigure --frontend noninteractive locales
-dpkg-reconfigure --frontend noninteractive keyboard-configuration
+# update-locale "LANG=en_US.UTF-8"
+# locale-gen --purge "en_US.UTF-8"
+# dpkg-reconfigure --frontend noninteractive locales
+# dpkg-reconfigure --frontend noninteractive keyboard-configuration
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc fastfetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance initramfs-tools sox libsox-fmt-all lshw -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc fastfetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance initramfs-tools sox libsox-fmt-all lshw lxinput -yy
 
 if lshw -class network | grep -q "wireless"; then
     apt install firmware-iwlwifi -yy
@@ -369,6 +369,10 @@ fi
 systemctl disable NetworkManager-wait-online.service 
 systemctl disable systemd-networkd-wait-online.service
 systemctl mask systemd-networkd-wait-online.service
+
+chattr +C /var/lib/libvirt/images
+virsh net-autostart default
+usermod -aG libvirt "$USER_NAME"
 
 if [ "$INSTALL_TYPE" != 2 ]; then
     apt install cryptsetup cryptsetup-bin cryptsetup-initramfs -yy
