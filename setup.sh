@@ -360,7 +360,7 @@ locale-gen
 # dpkg-reconfigure --frontend noninteractive keyboard-configuration
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc fastfetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance initramfs-tools sox libsox-fmt-all lshw lxinput -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc fastfetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance initramfs-tools sox libsox-fmt-all lshw lxinput maim -yy
 
 if lshw -class network | grep -q "wireless"; then
     apt install firmware-iwlwifi -yy
