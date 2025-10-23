@@ -6,7 +6,8 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 echo "Verifying required packages..."
-apt install --no-install-recommends fdisk rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap -yy >> /dev/null
+apt update >> /dev/null
+apt install fdisk rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap jq -yy >> /dev/null
 
 echo " "
 
