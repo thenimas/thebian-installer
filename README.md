@@ -21,7 +21,7 @@ https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/
 ## Usage
 The script simply can be downloaded and run as root.
 ```
-curl -o setup.sh https://github.com/thenimas/thebian-installer/raw/main/setup.sh
+wget https://github.com/thenimas/thebian-installer/raw/main/setup.sh
 chmod +x setup.sh
 sudo ./setup.sh
 ```
