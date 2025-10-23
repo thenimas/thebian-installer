@@ -249,27 +249,11 @@ EEOF
 fi
 
 cd /target
-# mkdir /target/_install
 
 # Make dummy files
 mkdir -p /target/etc/apt
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
-
-# Download the latest debian system image
-# wget https://cloud.debian.org/images/cloud/trixie/daily/latest/debian-13-nocloud-amd64-daily.raw
-# losetup -P /dev/loop99 debian-13-nocloud-amd64-daily.raw
-# sleep 1
-# mount /dev/loop99p1 /target/_install
-
-# # Extract image to the new drive
-# rsync -auxv --ignore-existing --exclude 'lost+found' /target/_install/* /target/
-
-# # Remove temporary files
-# umount _install/
-# losetup -D /dev/loop99
-# rmdir _install/
-# rm debian-13-nocloud-amd64-daily.raw
 
 debootstrap trixie /target http://deb.debian.org/debian
 
@@ -286,22 +270,6 @@ deb http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-
 deb-src http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-firmware
 "
 echo "$sourcescfg" > /target/etc/apt/sources.list
-
-# rm /target/etc/resolv.conf
-# touch /target/etc/resolv.conf
-
-# gateway="$(ip r | awk '/^def/{print $3}')"
-
-# echo "nameserver $gateway" >> /target/etc/resolv.conf
-# echo "nameserver 1.1.1.1" >> /target/etc/resolv.conf
-# echo "nameserver 8.8.8.8" >> /target/etc/resolv.conf
-
-# resolvcfg="            nameservers:
-#                 addresses:
-#                   - 1.1.1.1
-#                   - 8.8.8.8"
-
-# echo "$resolvcfg" >> /target/etc/netplan/90-default.yaml
 
 keyboardcfg="# KEYBOARD CONFIGURATION FILE
 
@@ -323,23 +291,10 @@ export PS1="(chroot) ${PS1}"
 
 mount -a
 
-# Remove files we're replacing later
-# rm -r /etc/apt/sources.list.d/*
-# rm -rf /etc/default/grub.d/
-# rm -rf /boot/grub/*
-
 # updating apt...
 dpkg --add-architecture i386
 apt update
 apt upgrade -yy
-
-# apt purge "*cloud*" -yy
-
-# removing all old grub (doesnt play nice with encryption)
-# grubp1="$(apt-mark showmanual | grep grub)"
-# grubp2="$(apt-mark showauto | grep grub)"
-# dpkg -P --force-all $grubp1
-# dpkg -P --force-all $grubp2
 
 # apt --fix-broken install -yy
 
@@ -361,11 +316,6 @@ hwclock --systohc
 # adding locale
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
-
-# update-locale "LANG=en_US.UTF-8"
-# locale-gen --purge "en_US.UTF-8"
-# dpkg-reconfigure --frontend noninteractive locales
-# dpkg-reconfigure --frontend noninteractive keyboard-configuration
 
 # installing packages
 apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc fastfetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance initramfs-tools sox libsox-fmt-all lshw lxinput maim grub-efi-amd64 linux-image-amd64 -yy
