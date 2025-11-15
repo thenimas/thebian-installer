@@ -364,16 +364,16 @@ if [ "$INSTALL_TYPE" != 2 ]; then
     echo "" >> /etc/crypttab
 fi
 
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/zram-generator.conf -O /etc/default/zram-generator.conf
+wget https://github.com/thenimas/thebian-installer/raw/swap/configs/grub -O /etc/default/grub
+wget https://github.com/thenimas/thebian-installer/raw/swap/configs/zram-generator.conf -O /etc/default/zram-generator.conf
 
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-full.png -O /boot/grub/grub-full.png
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-wide.png -O /boot/grub/grub-wide.png
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/swap/assets/grub-full.png -O /boot/grub/grub-full.png
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/swap/assets/grub-wide.png -O /boot/grub/grub-wide.png
 
 systemctl daemon-reload
 systemctl start /dev/zram0
 
-wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
+wget https://github.com/thenimas/thebian-installer/raw/swap/user.tar -O user.tar
 tar -xf user.tar
 rsync -a ./user/* /home/"$USER_NAME"/
 rsync -a ./user/.* /home/"$USER_NAME"/
