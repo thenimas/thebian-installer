@@ -425,7 +425,13 @@ EOT
 
 cd ~/
 
-for i in /dev/pts /dev /proc /sys/firmware/efi/efivars /sys /run /etc/resolv.conf /boot/efi /boot /home /var/log /tmp /var/tmp /var/cache / ; do 
+swapoff /target/swap/swapfile
+
+rm -rf /target/tmp/*
+rm -rf /target/var/tmp/*
+rm -rf /target/var/cache/*
+
+for i in /dev/pts /dev /proc /sys/firmware/efi/efivars /sys /run /etc/resolv.conf /boot/efi /boot /home /swap /var/log /tmp /var/tmp /var/cache / ; do 
     umount /target$i
 done
 
