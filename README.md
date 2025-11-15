@@ -14,8 +14,9 @@ https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/
 - 64-bit Intel or AMD CPU
 - 2GB of available RAM
 - 8GB of disk space 
-  - (32GB recommended for at least a few applications)
+  - >32GB recommended for standard use
 - UEFI/GPT Booting
+  - Secure Boot is not required but it is recommended, and should work without any modification.
 - Valid internet connection (for the installation)
 
 ## Usage
