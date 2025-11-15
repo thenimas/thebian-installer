@@ -190,6 +190,7 @@ EEOF
     btrfs subvol create /target/@
     btrfs subvol create /target/@home
     btrfs subvol create /target/@var-log
+    btrfs subvol create /target/@swap
     umount /target
 
     if [ "$IS_HDD" == 0 ]; then
@@ -197,34 +198,55 @@ EEOF
         mkdir -p /target/home
         mkdir -p /target/var/log
         mkdir -p /target/etc
+        mkdir -p /target/swap
         mount /dev/disk/by-uuid/$ROOT_UUID /target/home -o subvol=/@home,space_cache=v2,ssd,compress=zstd:1,discard=async
         mount /dev/disk/by-uuid/$ROOT_UUID /target/var/log -o subvol=/@var-log,space_cache=v2,ssd,compress=zstd:1,discard=async
+        mount /dev/disk/by-uuid/$ROOT_UUID /target/swap -o subvol=/@swap,space_cache=v2,ssd,compress=zstd:1,discard=async
 
         touch /target/etc/fstab
 
         echo "UUID=$ROOT_UUID / btrfs subvol=/@,space_cache=v2,ssd,compress=zstd:1,discard=async 0 0" >> /target/etc/fstab
         echo "UUID=$ROOT_UUID /home btrfs subvol=/@home,space_cache=v2,ssd,compress=zstd:1,discard=async 0 0" >> /target/etc/fstab
         echo "UUID=$ROOT_UUID /var/log btrfs subvol=/@var-log,space_cache=v2,ssd,compress=zstd:1,discard=async 0 0" >> /target/etc/fstab
+        echo "UUID=$ROOT_UUID /swap btrfs subvol=/@swap,space_cache=v2,ssd,compress=zstd:1,discard=async 0 0" >> /target/etc/fstab
     else
         mount /dev/disk/by-uuid/$ROOT_UUID /target -o subvol=/@,space_cache=v2,compress=zstd:3,autodefrag
         mkdir -p /target/home
         mkdir -p /target/var/log
         mkdir -p /target/etc
+        mkdir -p /target/swap
         mount /dev/disk/by-uuid/$ROOT_UUID /target/home -o subvol=/@home,space_cache=v2,compress=zstd:3,autodefrag
         mount /dev/disk/by-uuid/$ROOT_UUID /target/var/log -o subvol=/@var-log,space_cache=v2,compress=zstd:3,autodefrag
+        mount /dev/disk/by-uuid/$ROOT_UUID /target/swap -o subvol=/@swap,space_cache=v2,compress=zstd:3,autodefrag
 
         touch /target/etc/fstab
 
         echo "UUID=$ROOT_UUID / btrfs subvol=/@,space_cache=v2,compress=zstd:3,autodefrag 0 0" >> /target/etc/fstab
         echo "UUID=$ROOT_UUID /home btrfs subvol=/@home,space_cache=v2,compress=zstd:3,autodefrag 0 0" >> /target/etc/fstab
         echo "UUID=$ROOT_UUID /var/log btrfs subvol=/@var-log,space_cache=v2,compress=zstd:3,autodefrag 0 0" >> /target/etc/fstab
+        echo "UUID=$ROOT_UUID /swap btrfs subvol=/@var-log,space_cache=v2,compress=zstd:3,autodefrag 0 0" >> /target/etc/fstab
     fi
 
     echo "" >> /target/etc/fstab
 
+    # setting up swap
+    truncate -s 0 /target/swap/swapfile
+    chattr +C /target/swap/swapfile
+    mem="$( grep MemTotal /proc/meminfo | tr -s ' ' | cut -d ' ' -f2 )"
+    swsize="$(echo "scale=0 ; $mem / 2" | bc)"
+    dd if=/dev/zero of=/target/swap/swapfile bs=1024 count=$swsize status=progress
+    chmod 0600 /target/swap/swapfile
+    btrfs balance start -v -dconvert=single /target/swap 
+    mkswap /target/swap/swapfile
+    swapon /target/swap/swapfile
+
     echo "tmpfs /tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
     echo "tmpfs /var/tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
     echo "tmpfs /var/cache tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
+
+    echo "" >> /target/etc/fstab
+
+    echo "/swap/swapfile none swap nofail,pri=0 0 0" >> /target/etc/fstab
 
     mkdir -p /target/boot
 
