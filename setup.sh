@@ -7,7 +7,7 @@ fi
 
 echo "Verifying required packages..."
 apt update >> /dev/null
-apt install fdisk rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq -yy >> /dev/null
+apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq -yy >> /dev/null
 
 echo " "
 
@@ -276,7 +276,7 @@ fi
 cd /target
 
 # Make dummy files
-mkdir -p /target/etc/apt
+mkdir -p /target/etc/apt/sources.list.d/
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
 
@@ -284,17 +284,25 @@ debootstrap trixie /target http://deb.debian.org/debian
 
 # Adding necessary cfgs
 sourcescfg="# Thebian installer sources list
+Types: deb deb-src
+URIs: http://security.debian.org/debian/
+Suites: trixie
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
-deb http://deb.debian.org/debian/ trixie main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian/ trixie main contrib non-free non-free-firmware
+Types: deb deb-src
+URIs: http://security.debian.org/debian-security/
+Suites: trixie-security
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
-deb http://security.debian.org/debian-security trixie-security main contrib non-free  non-free-firmware
-deb-src http://security.debian.org/debian-security trixie-security main contrib non-free non-free-firmware
-
-deb http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-firmware
+Types: deb deb-src
+URIs: http://deb.debian.org/debian/
+Suites: trixie-updates
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 "
-echo "$sourcescfg" > /target/etc/apt/sources.list
+echo "$sourcescfg" > /target/etc/apt/sources.list.d/debian.sources
 
 keyboardcfg="# KEYBOARD CONFIGURATION FILE
 
@@ -343,7 +351,7 @@ echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc fastfetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xscreensaver nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance initramfs-tools sox libsox-fmt-all lshw lxinput maim grub-efi-amd64 linux-image-amd64 nodejs default-jdk python3 gdb -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc fastfetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xscreensaver nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance initramfs-tools sox libsox-fmt-all lshw lxinput maim grub-efi-amd64 linux-image-amd64 nodejs default-jdk python3 gdb bc fail2ban -yy
 
 if lshw -class network | grep -q "wireless"; then
     apt install firmware-iwlwifi -yy
@@ -399,11 +407,21 @@ passwd -e "$USER_NAME"
 # extra non-repository packages
 
 wget -qO - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg | gpg --dearmor | dd of=/usr/share/keyrings/vscodium-archive-keyring.gpg
-echo 'deb [ arch=amd64 signed-by=/usr/share/keyrings/vscodium-archive-keyring.gpg ] https://download.vscodium.com/debs vscodium main' | sudo tee /etc/apt/sources.list.d/vscodium.list
+echo "Types: deb
+URIs: https://download.vscodium.com/debs/
+Suites: vscodium
+Components: main
+Signed-By: /usr/share/keyrings/vscodium-archive-keyring.gpg
+" | tee /etc/apt/sources.list.d/vscodium.sources
 
 sudo mkdir -p /etc/apt/keyrings
 curl -L -o /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg
-echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | sudo tee /etc/apt/sources.list.d/syncthing.list
+echo "Types: deb
+URIs: https://apt.syncthing.net/
+Suites: syncthing
+Components: stable
+Signed-By: /etc/apt/keyrings/syncthing-archive-keyring.gpg
+" | tee /etc/apt/sources.list.d/syncthing.sources
 
 apt update
 apt install syncthing -yy
