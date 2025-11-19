@@ -233,7 +233,7 @@ EEOF
     truncate -s 0 /target/swap/swapfile
     chattr +C /target/swap/swapfile
     
-    mem="$(echo "scale=0 ; 1024 * 1024 * 16 " | bc)"
+    mem="$( grep MemTotal /proc/meminfo | tr -s ' ' | cut -d ' ' -f2 )"
     sw_chunk="$(echo "scale=0 ; sqrt(($mem/1000000) + 1) / 4" | bc)"
     sw_size="$(echo "scale=0 ; $sw_chunk*4 + 4" | bc)"
 
