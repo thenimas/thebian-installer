@@ -327,9 +327,6 @@ export PS1="(chroot) ${PS1}"
 
 mount -a
 
-export LC_CTYPE=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-
 # updating apt...
 dpkg --add-architecture i386
 apt update
@@ -340,6 +337,9 @@ apt upgrade -yy
 apt install locales locales-all util-linux-extra linux-image-amd64 firmware-linux grub2 dbus ca-certificates locales man-db sudo nano efibootmgr initramfs-tools -yy
 
 apt autoremove -yy
+
+export LC_CTYPE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
 setupcon
 
