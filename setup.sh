@@ -285,6 +285,8 @@ touch /target/etc/default/keyboard
 
 debootstrap trixie /target http://deb.debian.org/debian
 
+rm /target/etc/apt/sources.list
+
 # Adding necessary cfgs
 sourcescfg="# Thebian installer sources list
 Types: deb deb-src
@@ -334,7 +336,7 @@ apt upgrade -yy
 
 # apt --fix-broken install -yy
 
-apt install locales locales-all util-linux-extra linux-image-amd64 firmware-linux grub2 dbus ca-certificates locales man-db sudo nano efibootmgr initramfs-tools -yy
+apt install locales locales-all util-linux-extra linux-image-amd64 firmware-linux grub2 dbus ca-certificates locales man-db sudo nano efibootmgr initramfs-tools grub-efi-amd64-bin -yy
 
 apt autoremove -yy
 
@@ -357,7 +359,7 @@ echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc fastfetch nitrogen cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc fastfetch nitrogen cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales -yy
 
 if lshw -class network | grep -q "wireless"; then
     apt install firmware-iwlwifi -yy
@@ -450,19 +452,19 @@ EOT
 
 cd ~/
 
-swapoff /target/swap/swapfile
+# swapoff /target/swap/swapfile
 
-rm -rf /target/tmp/*
-rm -rf /target/var/tmp/*
-rm -rf /target/var/cache/*
+# rm -rf /target/tmp/*
+# rm -rf /target/var/tmp/*
+# rm -rf /target/var/cache/*
 
-for i in /dev/pts /dev /proc /sys/firmware/efi/efivars /sys /run /etc/resolv.conf /boot/efi /boot /home /swap /var/log /tmp /var/tmp /var/cache / ; do 
-    umount /target$i
-done
+# for i in /dev/pts /dev /proc /sys/firmware/efi/efivars /sys /run /etc/resolv.conf /boot/efi /boot /home /swap /var/log /tmp /var/tmp /var/cache / ; do 
+#     umount /target$i
+# done
 
-if [ "$INSTALL_TYPE" == 1 ]; then
-    cryptsetup close /dev/mapper/$CRYPT_NAME
-fi
+# if [ "$INSTALL_TYPE" == 1 ]; then
+#     cryptsetup close /dev/mapper/$CRYPT_NAME
+# fi
 
 echo ""
 echo "Installation complete! Your system is ready to reboot."
