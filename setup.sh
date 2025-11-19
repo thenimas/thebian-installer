@@ -327,6 +327,9 @@ export PS1="(chroot) ${PS1}"
 
 mount -a
 
+export LC_CTYPE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
 # updating apt...
 dpkg --add-architecture i386
 apt update
