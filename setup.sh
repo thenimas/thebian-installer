@@ -232,9 +232,12 @@ EEOF
     # setting up swap
     truncate -s 0 /target/swap/swapfile
     chattr +C /target/swap/swapfile
-    mem="$( grep MemTotal /proc/meminfo | tr -s ' ' | cut -d ' ' -f2 )"
-    swsize="$(echo "scale=0 ; $mem / 2" | bc)"
-    dd if=/dev/zero of=/target/swap/swapfile bs=1024 count=$swsize status=progress
+    
+    mem="$(echo "scale=0 ; 1024 * 1024 * 16 " | bc)"
+    sw_chunk="$(echo "scale=0 ; sqrt(($mem/1000000) + 1) / 4" | bc)"
+    sw_size="$(echo "scale=0 ; $sw_chunk*4 + 4" | bc)"
+
+    dd if=/dev/zero of=/target/swap/swapfile bs=1G count=$sw_size status=progress
     chmod 0600 /target/swap/swapfile
     btrfs balance start -v -dconvert=single /target/swap 
     mkswap /target/swap/swapfile
