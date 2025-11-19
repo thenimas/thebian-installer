@@ -288,7 +288,7 @@ debootstrap trixie /target http://deb.debian.org/debian
 # Adding necessary cfgs
 sourcescfg="# Thebian installer sources list
 Types: deb deb-src
-URIs: http://dev.debian.org/debian/
+URIs: http://deb.debian.org/debian/
 Suites: trixie
 Components: main contrib non-free non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
