@@ -7,7 +7,7 @@ fi
 
 echo "Verifying required packages..."
 apt update >> /dev/null
-apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq -yy >> /dev/null
+apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq
 
 echo " "
 
