@@ -283,7 +283,7 @@ mkdir -p /target/etc/apt/sources.list.d/
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
 
-debootstrap trixie /target http://deb.debian.org/debian
+debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,firmware-linux,grub2,dbus,ca-certificates.locales,man-db,sudo,nano,efibootmgr,initramfs-tools,grub-efi-amd64-bin,keyboard-configuration trixie /target http://deb.debian.org/debian
 
 rm /target/etc/apt/sources.list
 
@@ -320,7 +320,7 @@ XKBOPTIONS=""
 
 BACKSPACE="guess"
 "
-echo "$keyboardcfg" >> /target/etc/default/keyboard
+echo "$keyboardcfg" > /target/etc/default/keyboard
 
 # Chroot into the new installation
 for i in /dev /dev/pts /proc /sys /sys/firmware/efi/efivars /run /etc/resolv.conf; do mount --bind $i /target$i; done
@@ -335,8 +335,6 @@ apt update
 apt upgrade -yy
 
 # apt --fix-broken install -yy
-
-apt install locales locales-all util-linux-extra linux-image-amd64 firmware-linux grub2 dbus ca-certificates locales man-db sudo nano efibootmgr initramfs-tools grub-efi-amd64-bin -yy
 
 apt autoremove -yy
 
@@ -381,7 +379,7 @@ if [ "$INSTALL_TYPE" != 2 ]; then
 fi
 
 wget https://github.com/thenimas/thebian-installer/raw/swap/configs/grub -O /etc/default/grub
-wget https://github.com/thenimas/thebian-installer/raw/swap/configs/zram-generator.conf -O /etc/default/zram-generator.conf
+wget https://github.com/thenimas/thebian-installer/raw/swap/configs/zram-generator.conf -O /etc/systemd/zram-generator.conf
 
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/swap/assets/grub-full.png -O /boot/grub/grub-full.png
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/swap/assets/grub-wide.png -O /boot/grub/grub-wide.png
