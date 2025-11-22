@@ -283,7 +283,7 @@ mkdir -p /target/etc/apt/sources.list.d/
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
 
-debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,grub2,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,grub-efi-amd64-bin,keyboard-configuration trixie /target http://deb.debian.org/debian
+debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,grub2,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,grub-efi-amd64-signed,keyboard-configuration trixie /target http://deb.debian.org/debian
 
 rm /target/etc/apt/sources.list
 
