@@ -283,7 +283,7 @@ mkdir -p /target/etc/apt/sources.list.d/
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
 
-debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,grub-efi-amd64,keyboard-configuration trixie /target http://deb.debian.org/debian
+debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,keyboard-configuration trixie /target http://deb.debian.org/debian
 
 rm /target/etc/apt/sources.list
 
@@ -357,7 +357,7 @@ echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc fastfetch nitrogen cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate fastfetch nitrogen cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux grub-efi-amd64 -yy
 
 if lshw -class network | grep -q "wireless"; then
     apt install firmware-iwlwifi -yy
