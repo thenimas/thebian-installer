@@ -6,8 +6,8 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 echo "Verifying required packages..."
-apt update >> /dev/null
-apt install fdisk rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq -yy >> /dev/null
+apt update
+apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq
 
 echo " "
 
@@ -190,6 +190,7 @@ EEOF
     btrfs subvol create /target/@
     btrfs subvol create /target/@home
     btrfs subvol create /target/@var-log
+    btrfs subvol create /target/@swap
     umount /target
 
     if [ "$IS_HDD" == 0 ]; then
@@ -197,34 +198,58 @@ EEOF
         mkdir -p /target/home
         mkdir -p /target/var/log
         mkdir -p /target/etc
+        mkdir -p /target/swap
         mount /dev/disk/by-uuid/$ROOT_UUID /target/home -o subvol=/@home,space_cache=v2,ssd,compress=zstd:1,discard=async
         mount /dev/disk/by-uuid/$ROOT_UUID /target/var/log -o subvol=/@var-log,space_cache=v2,ssd,compress=zstd:1,discard=async
+        mount /dev/disk/by-uuid/$ROOT_UUID /target/swap -o subvol=/@swap,space_cache=v2,ssd,compress=zstd:1,discard=async
 
         touch /target/etc/fstab
 
         echo "UUID=$ROOT_UUID / btrfs subvol=/@,space_cache=v2,ssd,compress=zstd:1,discard=async 0 0" >> /target/etc/fstab
         echo "UUID=$ROOT_UUID /home btrfs subvol=/@home,space_cache=v2,ssd,compress=zstd:1,discard=async 0 0" >> /target/etc/fstab
         echo "UUID=$ROOT_UUID /var/log btrfs subvol=/@var-log,space_cache=v2,ssd,compress=zstd:1,discard=async 0 0" >> /target/etc/fstab
+        echo "UUID=$ROOT_UUID /swap btrfs subvol=/@swap,space_cache=v2,ssd,compress=zstd:1,discard=async 0 0" >> /target/etc/fstab
     else
         mount /dev/disk/by-uuid/$ROOT_UUID /target -o subvol=/@,space_cache=v2,compress=zstd:3,autodefrag
         mkdir -p /target/home
         mkdir -p /target/var/log
         mkdir -p /target/etc
+        mkdir -p /target/swap
         mount /dev/disk/by-uuid/$ROOT_UUID /target/home -o subvol=/@home,space_cache=v2,compress=zstd:3,autodefrag
         mount /dev/disk/by-uuid/$ROOT_UUID /target/var/log -o subvol=/@var-log,space_cache=v2,compress=zstd:3,autodefrag
+        mount /dev/disk/by-uuid/$ROOT_UUID /target/swap -o subvol=/@swap,space_cache=v2,compress=zstd:3,autodefrag
 
         touch /target/etc/fstab
 
         echo "UUID=$ROOT_UUID / btrfs subvol=/@,space_cache=v2,compress=zstd:3,autodefrag 0 0" >> /target/etc/fstab
         echo "UUID=$ROOT_UUID /home btrfs subvol=/@home,space_cache=v2,compress=zstd:3,autodefrag 0 0" >> /target/etc/fstab
         echo "UUID=$ROOT_UUID /var/log btrfs subvol=/@var-log,space_cache=v2,compress=zstd:3,autodefrag 0 0" >> /target/etc/fstab
+        echo "UUID=$ROOT_UUID /swap btrfs subvol=/@swap,space_cache=v2,compress=zstd:3,autodefrag 0 0" >> /target/etc/fstab
     fi
 
     echo "" >> /target/etc/fstab
 
+    # setting up swap
+    truncate -s 0 /target/swap/swapfile
+    chattr +C /target/swap/swapfile
+    
+    mem="$( grep MemTotal /proc/meminfo | tr -s ' ' | cut -d ' ' -f2 )"
+    sw_chunk="$(echo "scale=0 ; sqrt(($mem/1000000) + 1) / 4" | bc)"
+    sw_size="$(echo "scale=0 ; $sw_chunk*4 + 4" | bc)"
+
+    dd if=/dev/zero of=/target/swap/swapfile bs=1G count=$sw_size status=progress
+    chmod 0600 /target/swap/swapfile
+    btrfs balance start -v -dconvert=single /target/swap 
+    mkswap /target/swap/swapfile
+    swapon /target/swap/swapfile
+
     echo "tmpfs /tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
     echo "tmpfs /var/tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
     echo "tmpfs /var/cache tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
+
+    echo "" >> /target/etc/fstab
+
+    echo "/swap/swapfile none swap nofail,pri=0 0 0" >> /target/etc/fstab
 
     mkdir -p /target/boot
 
@@ -254,25 +279,35 @@ fi
 cd /target
 
 # Make dummy files
-mkdir -p /target/etc/apt
+mkdir -p /target/etc/apt/sources.list.d/
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
 
-debootstrap trixie /target http://deb.debian.org/debian
+debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,keyboard-configuration trixie /target http://deb.debian.org/debian
+
+rm /target/etc/apt/sources.list
 
 # Adding necessary cfgs
 sourcescfg="# Thebian installer sources list
+Types: deb deb-src
+URIs: http://deb.debian.org/debian/
+Suites: trixie
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
-deb http://deb.debian.org/debian/ trixie main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian/ trixie main contrib non-free non-free-firmware
+Types: deb deb-src
+URIs: http://security.debian.org/debian-security/
+Suites: trixie-security
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
-deb http://security.debian.org/debian-security trixie-security main contrib non-free  non-free-firmware
-deb-src http://security.debian.org/debian-security trixie-security main contrib non-free non-free-firmware
-
-deb http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-firmware
-deb-src http://deb.debian.org/debian/ trixie-updates main contrib non-free non-free-firmware
+Types: deb deb-src
+URIs: http://deb.debian.org/debian/
+Suites: trixie-updates
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 "
-echo "$sourcescfg" > /target/etc/apt/sources.list
+echo "$sourcescfg" > /target/etc/apt/sources.list.d/debian.sources
 
 keyboardcfg="# KEYBOARD CONFIGURATION FILE
 
@@ -285,7 +320,7 @@ XKBOPTIONS=""
 
 BACKSPACE="guess"
 "
-echo "$keyboardcfg" >> /target/etc/default/keyboard
+echo "$keyboardcfg" > /target/etc/default/keyboard
 
 # Chroot into the new installation
 for i in /dev /dev/pts /proc /sys /sys/firmware/efi/efivars /run /etc/resolv.conf; do mount --bind $i /target$i; done
@@ -301,9 +336,10 @@ apt upgrade -yy
 
 # apt --fix-broken install -yy
 
-apt install locales util-linux-extra -yy
-
 apt autoremove -yy
+
+export LC_CTYPE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
 setupcon
 
@@ -321,7 +357,7 @@ echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate kcalc fastfetch nitrogen nano sudo cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xscreensaver nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance initramfs-tools sox libsox-fmt-all lshw lxinput maim grub-efi-amd64 linux-image-amd64 nodejs default-jdk python3 gdb -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate fastfetch nitrogen cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux grub-efi-amd64 -yy
 
 if lshw -class network | grep -q "wireless"; then
     apt install firmware-iwlwifi -yy
@@ -342,16 +378,16 @@ if [ "$INSTALL_TYPE" != 2 ]; then
     echo "" >> /etc/crypttab
 fi
 
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/zram-generator.conf -O /etc/default/zram-generator.conf
+wget https://github.com/thenimas/thebian-installer/raw/swap/configs/grub -O /etc/default/grub
+wget https://github.com/thenimas/thebian-installer/raw/swap/configs/zram-generator.conf -O /etc/systemd/zram-generator.conf
 
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-full.png -O /boot/grub/grub-full.png
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-wide.png -O /boot/grub/grub-wide.png
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/swap/assets/grub-full.png -O /boot/grub/grub-full.png
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/swap/assets/grub-wide.png -O /boot/grub/grub-wide.png
 
 systemctl daemon-reload
 systemctl start /dev/zram0
 
-wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
+wget https://github.com/thenimas/thebian-installer/raw/swap/user.tar -O user.tar
 tar -xf user.tar
 rsync -a ./user/* /home/"$USER_NAME"/
 rsync -a ./user/.* /home/"$USER_NAME"/
@@ -362,6 +398,7 @@ chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
 
 # setup grub
 
+grub-install --target=x86_64-efi
 grub-install --target=x86_64-efi --removable
 update-grub2
 update-initramfs -u -k all
@@ -377,11 +414,21 @@ passwd -e "$USER_NAME"
 # extra non-repository packages
 
 wget -qO - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg | gpg --dearmor | dd of=/usr/share/keyrings/vscodium-archive-keyring.gpg
-echo 'deb [ arch=amd64 signed-by=/usr/share/keyrings/vscodium-archive-keyring.gpg ] https://download.vscodium.com/debs vscodium main' | sudo tee /etc/apt/sources.list.d/vscodium.list
+echo "Types: deb
+URIs: https://download.vscodium.com/debs/
+Suites: vscodium
+Components: main
+Signed-By: /usr/share/keyrings/vscodium-archive-keyring.gpg
+" | tee /etc/apt/sources.list.d/vscodium.sources
 
 sudo mkdir -p /etc/apt/keyrings
 curl -L -o /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg
-echo "deb [signed-by=/etc/apt/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable" | sudo tee /etc/apt/sources.list.d/syncthing.list
+echo "Types: deb
+URIs: https://apt.syncthing.net/
+Suites: syncthing
+Components: stable
+Signed-By: /etc/apt/keyrings/syncthing-archive-keyring.gpg
+" | tee /etc/apt/sources.list.d/syncthing.sources
 
 apt update
 apt install syncthing -yy
@@ -403,13 +450,19 @@ EOT
 
 cd ~/
 
-for i in /dev/pts /dev /proc /sys/firmware/efi/efivars /sys /run /etc/resolv.conf /boot/efi /boot /home /var/log /tmp /var/tmp /var/cache / ; do 
-    umount /target$i
-done
+# swapoff /target/swap/swapfile
 
-if [ "$INSTALL_TYPE" == 1 ]; then
-    cryptsetup close /dev/mapper/$CRYPT_NAME
-fi
+# rm -rf /target/tmp/*
+# rm -rf /target/var/tmp/*
+# rm -rf /target/var/cache/*
+
+# for i in /dev/pts /dev /proc /sys/firmware/efi/efivars /sys /run /etc/resolv.conf /boot/efi /boot /home /swap /var/log /tmp /var/tmp /var/cache / ; do 
+#     umount /target$i
+# done
+
+# if [ "$INSTALL_TYPE" == 1 ]; then
+#     cryptsetup close /dev/mapper/$CRYPT_NAME
+# fi
 
 echo ""
 echo "Installation complete! Your system is ready to reboot."
