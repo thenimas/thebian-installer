@@ -357,7 +357,7 @@ echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate fastfetch nitrogen cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux grub-efi-amd64 -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate fastfetch nitrogen cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux grub-efi-amd64 breeze-cursor-theme -yy
 
 if lshw -class network | grep -q "wireless"; then
     apt install firmware-iwlwifi -yy
@@ -395,6 +395,7 @@ rm -r user
 rm user.tar
 
 sed -i 's/USER_NAME/$USER_NAME/g' /home/"$USER_NAME"/.config/nitrogen/nitrogen.cfg
+sed -i 's/USER_NAME/$USER_NAME/g' /home/"$USER_NAME"/.config/nitrogen/bg-saved.cfg
 
 chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
 
