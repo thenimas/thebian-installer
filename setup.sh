@@ -394,6 +394,8 @@ rsync -a ./user/.* /home/"$USER_NAME"/
 rm -r user
 rm user.tar
 
+sed -i 's/USER_NAME/$USER_NAME/g' /home/"$USER_NAME"/.config/nitrogen/nitrogen.cfg
+
 chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
 
 # setup grub
