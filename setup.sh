@@ -291,20 +291,20 @@ rm /target/etc/apt/sources.list
 # Adding necessary cfgs
 sourcescfg="# Thebian installer sources list
 Types: deb deb-src
-URIs: http://deb.debian.org/debian/
+URIs: http://mirror.dst.ca/debian/ http://deb.debian.org/debian/
 Suites: trixie
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Types: deb deb-src
+URIs: http://mirror.dst.ca/debian/ http://deb.debian.org/debian/
+Suites: trixie-updates
 Components: main contrib non-free non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
 Types: deb deb-src
 URIs: http://security.debian.org/debian-security/
 Suites: trixie-security
-Components: main contrib non-free non-free-firmware
-Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
-
-Types: deb deb-src
-URIs: http://deb.debian.org/debian/
-Suites: trixie-updates
 Components: main contrib non-free non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 "
