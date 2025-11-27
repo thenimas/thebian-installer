@@ -329,6 +329,13 @@ export PS1="(chroot) ${PS1}"
 
 mount -a
 
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/locale.conf -O /etc/locale.conf
+
+# adding locale
+echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+echo "en_CA.UTF-8 UTF-8" >> /etc/locale.gen
+locale-gen
+
 # updating apt...
 dpkg --add-architecture i386
 apt update
@@ -338,8 +345,8 @@ apt upgrade -yy
 
 apt autoremove -yy
 
-export LC_CTYPE=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
+export LC_CTYPE=en_CA.UTF-8
+export LC_ALL=en_CA.UTF-8
 
 setupcon
 
@@ -351,10 +358,6 @@ usermod -aG sudo "$USER_NAME"
 ln -sf /usr/share/zoneinfo/Canada/Eastern /etc/localtime
 echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
-
-# adding locale
-echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
-locale-gen
 
 # installing packages
 apt install ark bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate fastfetch cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux grub-efi-amd64 breeze-cursor-theme xwallpaper -yy
