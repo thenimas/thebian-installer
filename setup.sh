@@ -39,18 +39,19 @@ read -p "Enter new name for your PC (hostname): " HOST_NAME
 echo " "
 
 willWriteRandom="N"
+encryptPass=""
 
 if [ "$INSTALL_TYPE" == 1 ]; then
-    echo "IMPORTANT WARNING:"
+    echo "WARNING: If you lose this password, there is 100% NO way to recover it and you will lose access to all of your data."
     echo " "
-    echo "After the partitioning is complete, you will be prompted to set up an encryption password. If you lose this password, there is 100% NO way to recover it and you will lose access to all of your data."
-    echo " "
-    confirm=" "
-    read -p "Type YES in all capital letters to continue: " confirm
-    if [ ! $confirm = "YES" ]; then
-        echo "Aborting."
-        exit 0
-    fi
+    while true; do
+        read -s -p "Please enter encryption passphrase: " encryptPass
+        echo
+        read -s -p "Confirm passphrase: " encryptPass2
+        echo
+        [ "$encryptPass" = "$encryptPass2" ] && break
+        echo "Passphrases do not match"
+    done
     echo " "
 fi 
 
@@ -160,12 +161,12 @@ EEOF
     ROOT_UUID=""
 
     if [ "$INSTALL_TYPE" == 1 ]; then
-        until cryptsetup luksFormat -q --verify-passphrase --type luks2 /dev/$ROOT_PART; do
-            echo "Try again"
-        done
-        until cryptsetup open /dev/$ROOT_PART "$ROOT_PART"_crypt; do
-            echo "Try again"
-        done
+        cryptsetup luksFormat -q --verify-passphrase --type luks2 /dev/$ROOT_PART <<EEOF
+$encryptPass
+$encryptPass
+EEOF
+
+        echo $encryptPass | cryptsetup open /dev/$ROOT_PART "$ROOT_PART"_crypt
 
         CRYPT_NAME="$ROOT_PART"_crypt;
         CRYPT_UUID="$(lsblk -no UUID /dev/$ROOT_PART)"
@@ -357,7 +358,7 @@ echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate fastfetch nitrogen cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core nitrogen xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux grub-efi-amd64 breeze-cursor-theme -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate fastfetch cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux grub-efi-amd64 breeze-cursor-theme xwallpaper -yy
 
 if lshw -class network | grep -q "wireless"; then
     apt install firmware-iwlwifi -yy
@@ -393,9 +394,6 @@ rsync -a ./user/* /home/"$USER_NAME"/
 rsync -a ./user/.* /home/"$USER_NAME"/
 rm -r user
 rm user.tar
-
-sed -i 's/USER_NAME/$USER_NAME/g' /home/"$USER_NAME"/.config/nitrogen/nitrogen.cfg
-sed -i 's/USER_NAME/$USER_NAME/g' /home/"$USER_NAME"/.config/nitrogen/bg-saved.cfg
 
 chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
 
