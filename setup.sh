@@ -454,9 +454,11 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 
 apt autoremove -yy
 
-timeshift --check
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-boot -O /etc/cron.d/timeshift-boot
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-hourly -O /etc/cron.d/timeshift-hourly
 
 EOT
+
 
 cd ~/
 
