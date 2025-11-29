@@ -246,7 +246,6 @@ EEOF
 
     echo "tmpfs /tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
     echo "tmpfs /var/tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
-    echo "tmpfs /var/cache tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
 
     echo "" >> /target/etc/fstab
 
@@ -284,7 +283,7 @@ mkdir -p /target/etc/apt/sources.list.d/
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
 
-debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,keyboard-configuration trixie /target http://deb.debian.org/debian
+debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,keyboard-configuration,zstd trixie /target http://deb.debian.org/debian
 
 rm /target/etc/apt/sources.list
 
@@ -330,6 +329,13 @@ export PS1="(chroot) ${PS1}"
 
 mount -a
 
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/locale.conf -O /etc/locale.conf
+
+# adding locale
+echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+echo "en_CA.UTF-8 UTF-8" >> /etc/locale.gen
+locale-gen
+
 # updating apt...
 dpkg --add-architecture i386
 apt update
@@ -339,8 +345,8 @@ apt upgrade -yy
 
 apt autoremove -yy
 
-export LC_CTYPE=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
+export LC_CTYPE=en_CA.UTF-8
+export LC_ALL=en_CA.UTF-8
 
 setupcon
 
@@ -353,12 +359,13 @@ ln -sf /usr/share/zoneinfo/Canada/Eastern /etc/localtime
 echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
 
-# adding locale
-echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
-locale-gen
-
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate fastfetch cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux grub-efi-amd64 breeze-cursor-theme xwallpaper -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-ubuntu flatpak gamemode gnome-software ufw i3 kate fastfetch cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux grub-efi-amd64 breeze-cursor-theme xwallpaper libpam-winbind- -yy
+
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift.json -O /etc/timeshift/timeshift.json
+
+sed -i 's/ROOT_UUID/'"$ROOT_UUID"'/g' /etc/timeshift/timeshift.json
+sed -i 's/CRYPT_UUID/'"$CRYPT_UUID"'/g' /etc/timeshift/timeshift.json
 
 if lshw -class network | grep -q "wireless"; then
     apt install firmware-iwlwifi -yy
@@ -447,7 +454,11 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 
 apt autoremove -yy
 
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-boot -O /etc/cron.d/timeshift-boot
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-hourly -O /etc/cron.d/timeshift-hourly
+
 EOT
+
 
 cd ~/
 
