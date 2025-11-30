@@ -435,7 +435,7 @@ curl -L -o /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net
 echo "Types: deb
 URIs: https://apt.syncthing.net/
 Suites: syncthing
-Components: stable
+Components: stable-v2
 Signed-By: /etc/apt/keyrings/syncthing-archive-keyring.gpg
 " | tee /etc/apt/sources.list.d/syncthing.sources
 
