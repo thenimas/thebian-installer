@@ -427,9 +427,10 @@ URIs: https://download.vscodium.com/debs/
 Suites: vscodium
 Components: main
 Signed-By: /usr/share/keyrings/vscodium-archive-keyring.gpg
+Architectures: amd64
 " | tee /etc/apt/sources.list.d/vscodium.sources
 
-sudo mkdir -p /etc/apt/keyrings
+mkdir -p /etc/apt/keyrings
 curl -L -o /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg
 echo "Types: deb
 URIs: https://apt.syncthing.net/
