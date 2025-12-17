@@ -366,9 +366,10 @@ echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode gnome-software ufw i3 kate fastfetch cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux grub-efi-amd64 breeze-cursor-theme xwallpaper geeqie libpam-winbind- -yy
+apt install ark bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode gnome-software ufw i3 kate fastfetch cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux grub-efi-amd64 breeze-cursor-theme xwallpaper geeqie libpam-winbind- apt-listbugs rkhunter lynis -yy
 
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift.json -O /etc/timeshift/timeshift.json
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/jail.local -O /etc/fail2ban/jail.local
 
 sed -i 's/ROOT_UUID/'"$ROOT_UUID"'/g' /etc/timeshift/timeshift.json
 sed -i 's/CRYPT_UUID/'"$CRYPT_UUID"'/g' /etc/timeshift/timeshift.json
