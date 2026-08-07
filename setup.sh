@@ -26,6 +26,12 @@ INSTALL_TYPE="0"
 CRYPT_NAME=""
 crypttab_entry=""
 
+CHASSIS="$(hostnamectl chassis)"
+IS_LAPTOP=0
+if [[ "$CHASSIS" == "laptop" || "$CHASSIS" == "tablet" ]]; then
+    IS_LAPTOP=1
+fi
+
 until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 3 ]; do
     read -p "(1,2,3): " INSTALL_TYPE
 done
@@ -470,22 +476,27 @@ wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-ho
 
 EOT
 
+if [ "$IS_LAPTOP" == 1 ]; then
+    sed -i 's/# bindsym XF86MonBrightness/bindsym XF86MonBrightness/g' /target/home/"$USER_NAME"/.config/i3/config
+    sed -i 's/# order += "battery all"/order += "battery all"/g' /target/home/"$USER_NAME"/.config/i3/i3status.conf
+
+    chroot /target /bin/bash << EOT
+apt install --no-install-suggests --no-install-recommends bluez bluez-tools iw powertop wpa_supplicant brightnessctl -yy
+
+cd /root
+
+git clone https://github.com/electrickite/batsignal.git
+cd batsignal
+make
+make install
+
+cd /
+rm -r /root/batsignal
+
+EOT
+fi
 
 cd ~/
-
-# swapoff /target/swap/swapfile
-
-# rm -rf /target/tmp/*
-# rm -rf /target/var/tmp/*
-# rm -rf /target/var/cache/*
-
-# for i in /dev/pts /dev /proc /sys/firmware/efi/efivars /sys /run /etc/resolv.conf /boot/efi /boot /home /swap /var/log /tmp /var/tmp /var/cache / ; do 
-#     umount /target$i
-# done
-
-# if [ "$INSTALL_TYPE" == 1 ]; then
-#     cryptsetup close /dev/mapper/$CRYPT_NAME
-# fi
 
 echo ""
 echo "Installation complete! Your system is ready to reboot."
