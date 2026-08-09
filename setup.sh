@@ -26,6 +26,12 @@ INSTALL_TYPE="0"
 CRYPT_NAME=""
 crypttab_entry=""
 
+CHASSIS="$(hostnamectl chassis)"
+IS_LAPTOP=0
+if [[ "$CHASSIS" == "laptop" || "$CHASSIS" == "tablet" ]]; then
+    IS_LAPTOP=1
+fi
+
 until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 3 ]; do
     read -p "(1,2,3): " INSTALL_TYPE
 done
@@ -289,7 +295,7 @@ mkdir -p /target/etc/apt/sources.list.d/
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
 
-debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,keyboard-configuration,zstd trixie /target http://deb.debian.org/debian
+debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,keyboard-configuration,zstd,wget trixie /target http://deb.debian.org/debian
 
 rm /target/etc/apt/sources.list
 
@@ -333,6 +339,8 @@ for i in /dev /dev/pts /proc /sys /sys/firmware/efi/efivars /run /etc/resolv.con
 chroot /target /bin/bash << EOT
 export PS1="(chroot) ${PS1}"
 
+sleep 0.5
+
 mount -a
 
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/locale.conf -O /etc/locale.conf
@@ -366,7 +374,9 @@ echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
 
 # installing packages
-apt install ark bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode gnome-software ufw i3 kate fastfetch cryptsetup pavucontrol pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager redshift-gtk rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree wget systemsettings systemd-zram-generator lxappearance accountsservice sox libsox-fmt-all lshw lxinput maim nodejs default-jdk python3 gdb bc fail2ban krb5-locales firmware-linux grub-efi-amd64 breeze-cursor-theme xwallpaper geeqie libpam-winbind- apt-listbugs rkhunter lynis needrestart -yy
+apt install bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode ufw i3 kate fastfetch cryptsetup pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree systemsettings accountsservice sox libsox-fmt-all lshw firmware-linux linux-headers-amd64 krb5-locales grub-efi-amd64 xwallpaper apt-listchanges systemd-timesyncd -yy
+
+apt install --no-install-suggests --no-install-recommends ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc fail2ban  breeze-cursor-theme geeqie libpam-winbind- apt-listbugs rkhunter lynis lxqt-policykit ffmpegthumbnailer avahi-utils gvfs-fuse xsettingsd system-config-printer -yy
 
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift.json -O /etc/timeshift/timeshift.json
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/jail.local -O /etc/fail2ban/jail.local
@@ -382,6 +392,9 @@ systemctl disable NetworkManager-wait-online.service
 systemctl disable systemd-networkd-wait-online.service
 systemctl mask systemd-networkd-wait-online.service
 
+systemctl enable fail2ban
+systemctl enable avahi-daemon
+
 chattr +C /var/lib/libvirt/images
 virsh net-autostart default
 usermod -aG libvirt "$USER_NAME"
@@ -394,13 +407,11 @@ if [ "$INSTALL_TYPE" != 2 ]; then
 fi
 
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/zram-generator.conf -O /etc/systemd/zram-generator.conf
 
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-full.png -O /boot/grub/grub-full.png
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-wide.png -O /boot/grub/grub-wide.png
 
 systemctl daemon-reload
-systemctl start /dev/zram0
 
 wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
 tar -xf user.tar
@@ -467,22 +478,27 @@ wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-ho
 
 EOT
 
+if [ "$IS_LAPTOP" == 1 ]; then
+    sed -i 's/# bindsym XF86MonBrightness/bindsym XF86MonBrightness/g' /target/home/"$USER_NAME"/.config/i3/config
+    sed -i 's/# order += "battery all"/order += "battery all"/g' /target/home/"$USER_NAME"/.config/i3/i3status.conf
+
+    chroot /target /bin/bash << EOT
+apt install --no-install-suggests --no-install-recommends bluez bluez-tools iw powertop wpa_supplicant brightnessctl -yy
+
+cd /root
+
+git clone https://github.com/electrickite/batsignal.git
+cd batsignal
+make
+make install
+
+cd /
+rm -r /root/batsignal
+
+EOT
+fi
 
 cd ~/
-
-# swapoff /target/swap/swapfile
-
-# rm -rf /target/tmp/*
-# rm -rf /target/var/tmp/*
-# rm -rf /target/var/cache/*
-
-# for i in /dev/pts /dev /proc /sys/firmware/efi/efivars /sys /run /etc/resolv.conf /boot/efi /boot /home /swap /var/log /tmp /var/tmp /var/cache / ; do 
-#     umount /target$i
-# done
-
-# if [ "$INSTALL_TYPE" == 1 ]; then
-#     cryptsetup close /dev/mapper/$CRYPT_NAME
-# fi
 
 echo ""
 echo "Installation complete! Your system is ready to reboot."
