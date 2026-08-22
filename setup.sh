@@ -9,7 +9,7 @@ fi
 
 echo "Verifying required packages..."
 apt update
-apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq
+apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq playerctl
 
 echo " "
 
@@ -514,6 +514,9 @@ EOT
 fi
 
 cd ~/
+
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/finish.mp3
+play ~/finish.mp3
 
 echo ""
 echo "Installation complete! Your system is ready to reboot."
