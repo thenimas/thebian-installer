@@ -5,6 +5,8 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+## STAGE 1
+
 echo "Verifying required packages..."
 apt update
 apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq
@@ -288,6 +290,8 @@ EEOF
     mkdir -p /target/boot
 fi
 
+## STAGE 2
+
 cd /target
 
 # Make dummy files
@@ -364,10 +368,6 @@ export LC_ALL=en_CA.UTF-8
 
 setupcon
 
-# make user
-useradd -m -s /bin/bash "$USER_NAME"
-usermod -aG sudo "$USER_NAME"
-
 # adding data we specified
 ln -sf /usr/share/zoneinfo/Canada/Eastern /etc/localtime
 echo "$HOST_NAME" > /etc/hostname
@@ -413,15 +413,6 @@ wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/gr
 
 systemctl daemon-reload
 
-wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
-tar -xf user.tar
-rsync -a ./user/* /home/"$USER_NAME"/
-rsync -a ./user/.* /home/"$USER_NAME"/
-rm -r user
-rm user.tar
-
-chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
-
 # setup grub
 
 grub-install --target=x86_64-efi
@@ -432,10 +423,6 @@ update-initramfs -u -k all
 # disable root account
 passwd -d root
 passwd -l root
-
-# expire users password (so they'll be prompted to make one on login)
-passwd -d "$USER_NAME"
-passwd -e "$USER_NAME"
 
 # extra non-repository packages
 
@@ -478,6 +465,32 @@ wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-ho
 
 EOT
 
+## STAGE 3
+
+chroot /target /bin/bash << EOT
+# make user
+useradd -m -s /bin/bash "$USER_NAME"
+usermod -aG sudo "$USER_NAME"
+
+# expire users password (so they'll be prompted to make one on login)
+passwd -d "$USER_NAME"
+passwd -e "$USER_NAME"
+
+wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
+tar -xf user.tar
+rsync -a ./user/* /home/"$USER_NAME"/
+rsync -a ./user/.* /home/"$USER_NAME"/
+rm -r user
+rm user.tar
+
+chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
+
+runuser "$USER_NAME" -c 'xdg-mime default thunar.desktop inode/directory application/x-gnome-saved-search'
+
+runuser "$USER_NAME" -c 'flatpak install net.waterfox.waterfox -y'
+
+EOT
+
 if [ "$IS_LAPTOP" == 1 ]; then
     sed -i 's/# bindsym XF86MonBrightness/bindsym XF86MonBrightness/g' /target/home/"$USER_NAME"/.config/i3/config
     sed -i 's/# order += "battery all"/order += "battery all"/g' /target/home/"$USER_NAME"/.config/i3/i3status.conf
@@ -494,6 +507,8 @@ make install
 
 cd /
 rm -r /root/batsignal
+
+runuser "$USER_NAME" -c 'systemctl --user enable batsignal'
 
 EOT
 fi
