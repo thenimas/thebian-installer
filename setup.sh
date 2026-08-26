@@ -374,9 +374,7 @@ echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
 
 # installing packages
-apt install bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode ufw i3 kate fastfetch cryptsetup pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree systemsettings accountsservice sox libsox-fmt-all lshw firmware-linux linux-headers-amd64 krb5-locales grub-efi-amd64 xwallpaper apt-listchanges systemd-timesyncd -yy
-
-apt install --no-install-suggests --no-install-recommends ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc fail2ban  breeze-cursor-theme geeqie libpam-winbind- apt-listbugs rkhunter lynis lxqt-policykit ffmpegthumbnailer avahi-utils gvfs-fuse xsettingsd system-config-printer -yy
+apt install btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode ufw kate fastfetch cryptsetup plymouth plymouth-themes timeshift network-manager tasksel curl firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 krb5-locales grub-efi-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils -yy
 
 wget https://github.com/thenimas/thebian-installer/raw/headless/configs/timeshift.json -O /etc/timeshift/timeshift.json
 wget https://github.com/thenimas/thebian-installer/raw/headless/configs/jail.local -O /etc/fail2ban/jail.local
@@ -426,15 +424,6 @@ passwd -l root
 
 # extra non-repository packages
 
-wget -qO - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg | gpg --dearmor | dd of=/usr/share/keyrings/vscodium-archive-keyring.gpg
-echo "Types: deb
-URIs: https://download.vscodium.com/debs/
-Suites: vscodium
-Components: main
-Signed-By: /usr/share/keyrings/vscodium-archive-keyring.gpg
-Architectures: amd64
-" | tee /etc/apt/sources.list.d/vscodium.sources
-
 mkdir -p /etc/apt/keyrings
 curl -L -o /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg
 echo "Types: deb
@@ -446,7 +435,6 @@ Signed-By: /etc/apt/keyrings/syncthing-archive-keyring.gpg
 
 apt update
 apt install syncthing -yy
-apt install codium -yy
 
 # add firewall rules
 ufw default deny incoming
@@ -476,18 +464,7 @@ usermod -aG sudo "$USER_NAME"
 passwd -d "$USER_NAME"
 passwd -e "$USER_NAME"
 
-wget https://github.com/thenimas/thebian-installer/raw/headless/user.tar -O user.tar
-tar -xf user.tar
-rsync -a ./user/* /home/"$USER_NAME"/
-rsync -a ./user/.* /home/"$USER_NAME"/
-rm -r user
-rm user.tar
-
 chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
-
-runuser "$USER_NAME" -c 'xdg-mime default thunar.desktop inode/directory application/x-gnome-saved-search'
-
-# runuser "$USER_NAME" -c 'flatpak install net.waterfox.waterfox -y'
 
 EOT
 
