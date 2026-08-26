@@ -374,7 +374,9 @@ echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
 
 # installing packages
-apt install btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode ufw kate fastfetch cryptsetup plymouth plymouth-themes timeshift network-manager tasksel curl firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 krb5-locales grub-efi-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils -yy
+apt install btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel curl firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 grub-efi-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils -yy
+
+apt install --no-install-suggests --no-install-recommends timeshift -yy
 
 wget https://github.com/thenimas/thebian-installer/raw/headless/configs/timeshift.json -O /etc/timeshift/timeshift.json
 wget https://github.com/thenimas/thebian-installer/raw/headless/configs/jail.local -O /etc/fail2ban/jail.local
