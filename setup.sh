@@ -347,7 +347,7 @@ sleep 0.5
 
 mount -a
 
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/locale.conf -O /etc/locale.conf
+wget https://github.com/thenimas/thebian-installer/raw/headless/configs/locale.conf -O /etc/locale.conf
 
 # adding locale
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
@@ -378,8 +378,8 @@ apt install bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-c
 
 apt install --no-install-suggests --no-install-recommends ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc fail2ban  breeze-cursor-theme geeqie libpam-winbind- apt-listbugs rkhunter lynis lxqt-policykit ffmpegthumbnailer avahi-utils gvfs-fuse xsettingsd system-config-printer -yy
 
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift.json -O /etc/timeshift/timeshift.json
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/jail.local -O /etc/fail2ban/jail.local
+wget https://github.com/thenimas/thebian-installer/raw/headless/configs/timeshift.json -O /etc/timeshift/timeshift.json
+wget https://github.com/thenimas/thebian-installer/raw/headless/configs/jail.local -O /etc/fail2ban/jail.local
 
 sed -i 's/ROOT_UUID/'"$ROOT_UUID"'/g' /etc/timeshift/timeshift.json
 sed -i 's/CRYPT_UUID/'"$CRYPT_UUID"'/g' /etc/timeshift/timeshift.json
@@ -406,10 +406,10 @@ if [ "$INSTALL_TYPE" != 2 ]; then
     echo "" >> /etc/crypttab
 fi
 
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
+wget https://github.com/thenimas/thebian-installer/raw/headless/configs/grub -O /etc/default/grub
 
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-full.png -O /boot/grub/grub-full.png
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-wide.png -O /boot/grub/grub-wide.png
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/headless/assets/grub-full.png -O /boot/grub/grub-full.png
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/headless/assets/grub-wide.png -O /boot/grub/grub-wide.png
 
 systemctl daemon-reload
 
@@ -460,8 +460,8 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 
 apt autoremove -yy
 
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-boot -O /etc/cron.d/timeshift-boot
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-hourly -O /etc/cron.d/timeshift-hourly
+wget https://github.com/thenimas/thebian-installer/raw/headless/configs/timeshift-boot -O /etc/cron.d/timeshift-boot
+wget https://github.com/thenimas/thebian-installer/raw/headless/configs/timeshift-hourly -O /etc/cron.d/timeshift-hourly
 
 EOT
 
@@ -476,7 +476,7 @@ usermod -aG sudo "$USER_NAME"
 passwd -d "$USER_NAME"
 passwd -e "$USER_NAME"
 
-wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
+wget https://github.com/thenimas/thebian-installer/raw/headless/user.tar -O user.tar
 tar -xf user.tar
 rsync -a ./user/* /home/"$USER_NAME"/
 rsync -a ./user/.* /home/"$USER_NAME"/
@@ -487,7 +487,7 @@ chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
 
 runuser "$USER_NAME" -c 'xdg-mime default thunar.desktop inode/directory application/x-gnome-saved-search'
 
-runuser "$USER_NAME" -c 'flatpak install net.waterfox.waterfox -y'
+# runuser "$USER_NAME" -c 'flatpak install net.waterfox.waterfox -y'
 
 EOT
 
@@ -515,7 +515,7 @@ fi
 
 cd ~/
 
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/finish.mp3
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/headless/assets/finish.mp3
 play ~/finish.mp3
 
 echo ""
