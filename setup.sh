@@ -254,7 +254,7 @@ EEOF
     sw_size="$(echo "scale=0 ; $sw_chunk*4 + 4" | bc)"
     sw_size="$(echo "scale=0 ; $sw_size*1024" | bc)"
 
-    dd if=/dev/zero of=/target/swap/swapfile bs=1G count=$sw_size status=progress
+    dd if=/dev/zero of=/target/swap/swapfile bs=1M count=$sw_size status=progress
     chmod 0600 /target/swap/swapfile
     btrfs balance start -v -dconvert=single /target/swap 
     mkswap /target/swap/swapfile
