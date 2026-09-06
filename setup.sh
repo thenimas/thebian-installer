@@ -251,6 +251,8 @@ EEOF
     mem="$( grep MemTotal /proc/meminfo | tr -s ' ' | cut -d ' ' -f2 )"
     sw_chunk="$(echo "scale=0 ; sqrt(($mem/1000000) + 1) / 4" | bc)"
     sw_size="$(echo "scale=0 ; $sw_chunk*4 + 4" | bc)"
+    sw_size="$(echo "scale=0 ; $sw_chunk*4 + 4" | bc)"
+    sw_size="$(echo "scale=0 ; $sw_size*1024" | bc)"
 
     dd if=/dev/zero of=/target/swap/swapfile bs=1G count=$sw_size status=progress
     chmod 0600 /target/swap/swapfile
@@ -258,8 +260,8 @@ EEOF
     mkswap /target/swap/swapfile
     swapon /target/swap/swapfile
 
-    echo "tmpfs /tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
-    echo "tmpfs /var/tmp tmpfs rw,nodev,nosuid,size=2G 0 0" >> /target/etc/fstab
+    echo "tmpfs /tmp tmpfs rw,nodev,nosuid,size=512M 0 0" >> /target/etc/fstab
+    echo "tmpfs /var/tmp tmpfs rw,nodev,nosuid,size=512M 0 0" >> /target/etc/fstab
 
     echo "" >> /target/etc/fstab
 
