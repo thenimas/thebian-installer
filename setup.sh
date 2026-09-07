@@ -68,10 +68,6 @@ if [ "$INSTALL_TYPE" == 3 ]; then
         echo "ERROR: /target not mounted!"
         exit 1
     fi
-    if ! cat /proc/mounts | grep -q "/target/boot/efi " ; then
-        echo "ERROR: /target/boot/efi not mounted!"
-        exit 1
-    fi
 else
     availableDisks="$(lsblk -d | grep disk | cut -d' ' -f1)"
 
@@ -428,24 +424,11 @@ passwd -l root
 
 # extra non-repository packages
 
-mkdir -p /etc/apt/keyrings
-curl -L -o /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg
-echo "Types: deb
-URIs: https://apt.syncthing.net/
-Suites: syncthing
-Components: stable-v2
-Signed-By: /etc/apt/keyrings/syncthing-archive-keyring.gpg
-" | tee /etc/apt/sources.list.d/syncthing.sources
-
-apt update
-apt install syncthing -yy
-
 # add firewall rules
 ufw default deny incoming
 ufw default allow outgoing
 ufw allow 80
 ufw allow 443
-ufw allow syncthing
 ufw enable
 
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
