@@ -68,10 +68,6 @@ if [ "$INSTALL_TYPE" == 3 ]; then
         echo "ERROR: /target not mounted!"
         exit 1
     fi
-    if ! cat /proc/mounts | grep -q "/target/boot/efi " ; then
-        echo "ERROR: /target/boot/efi not mounted!"
-        exit 1
-    fi
 else
     availableDisks="$(lsblk -d | grep disk | cut -d' ' -f1)"
 
