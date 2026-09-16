@@ -34,6 +34,11 @@ if [[ "$CHASSIS" == "laptop" || "$CHASSIS" == "tablet" ]]; then
     IS_LAPTOP=1
 fi
 
+BOOT_TYPE="BIOS"
+if [ -d /sys/firmware/efi ]; then
+    BOOT_TYPE="UEFI"
+fi
+
 until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 3 ]; do
     read -p "(1,2,3): " INSTALL_TYPE
 done
@@ -126,7 +131,13 @@ else
         dd if=/dev/zero of=/dev/$installDisk bs=4M count=1
     fi
 
-    fdisk /dev/$installDisk <<EEOF
+    EFI_PART=""
+    BOOT_PART=""
+    ROOT_PART=""
+
+    if [ "$BOOT_TYPE" == "UEFI" ]; then
+
+        fdisk /dev/$installDisk <<EEOF
 g
 n
 
@@ -151,19 +162,43 @@ t
 w
 EEOF
 
-    sleep 0.5
+        sleep 0.5
 
-    EFI_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "0" '.blockdevices[0].children[$part].name')"
-    BOOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "1" '.blockdevices[0].children[$part].name')"
-    ROOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "2" '.blockdevices[0].children[$part].name')"
+        EFI_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "0" '.blockdevices[0].children[$part].name')"
+        BOOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "1" '.blockdevices[0].children[$part].name')"
+        ROOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "2" '.blockdevices[0].children[$part].name')"
 
-    dd if=/dev/zero of=/dev/$EFI_PART bs=4M count=1
+        dd if=/dev/zero of=/dev/$EFI_PART bs=4M count=1
+
+        sleep 0.5
+        mkfs.vfat -F 32 /dev/$EFI_PART
+    else
+
+        fdisk /dev/$installDisk <<EEOF
+o
+n
+p
+
+
++1G
+n
+p
+
+
+
+w
+EEOF
+
+    BOOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "0" '.blockdevices[0].children[$part].name')"
+    ROOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "1" '.blockdevices[0].children[$part].name')"
+
+    fi
+
     dd if=/dev/zero of=/dev/$BOOT_PART bs=4M count=1
     dd if=/dev/zero of=/dev/$ROOT_PART bs=4M count=1
 
     sleep 0.5
 
-    mkfs.vfat -F 32 /dev/$EFI_PART
     mkfs.ext4 /dev/$BOOT_PART
     
 
@@ -247,8 +282,9 @@ EEOF
     mem="$( grep MemTotal /proc/meminfo | tr -s ' ' | cut -d ' ' -f2 )"
     sw_chunk="$(echo "scale=0 ; sqrt(($mem/1000000) + 1) / 4" | bc)"
     sw_size="$(echo "scale=0 ; $sw_chunk*4 + 4" | bc)"
+    sw_size="$(echo "scale=0 ; $sw_size*1024" | bc)"
 
-    dd if=/dev/zero of=/target/swap/swapfile bs=1G count=$sw_size status=progress
+    dd if=/dev/zero of=/target/swap/swapfile bs=1M count=$sw_size status=progress
     chmod 0600 /target/swap/swapfile
     btrfs balance start -v -dconvert=single /target/swap 
     mkswap /target/swap/swapfile
@@ -370,7 +406,7 @@ echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
 
 # installing packages
-apt install bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode ufw i3 kate fastfetch cryptsetup pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree systemsettings accountsservice sox libsox-fmt-all lshw firmware-linux linux-headers-amd64 krb5-locales grub-efi-amd64 xwallpaper apt-listchanges systemd-timesyncd -yy
+apt install bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode ufw i3 kate fastfetch cryptsetup pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree systemsettings accountsservice sox libsox-fmt-all lshw firmware-linux linux-headers-amd64 krb5-locales xwallpaper apt-listchanges systemd-timesyncd -yy
 
 apt install --no-install-suggests --no-install-recommends ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc fail2ban  breeze-cursor-theme geeqie libpam-winbind- apt-listbugs rkhunter lynis lxqt-policykit ffmpegthumbnailer avahi-utils gvfs-fuse xsettingsd system-config-printer -yy
 
@@ -411,9 +447,17 @@ systemctl daemon-reload
 
 # setup grub
 
-grub-install --target=x86_64-efi
-grub-install --target=x86_64-efi --removable
-update-grub2
+if [ "$BOOT_TYPE" == "BIOS" ]; then
+    apt install grub-pc -yy
+    grub-install --target=i386-pc /dev/"$installDisk"
+    update-grub2
+else
+    apt install grub-efi-amd64 -yy
+    grub-install --target=x86_64-efi
+    grub-install --target=x86_64-efi --removable
+    update-grub2
+fi
+
 update-initramfs -u -k all
 
 # disable root account
