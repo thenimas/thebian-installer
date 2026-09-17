@@ -309,7 +309,9 @@ EEOF
 
     echo "" >> /target/etc/fstab
     echo "UUID=$BOOT_UUID /boot ext4 nofail 0 2" >> /target/etc/fstab
-    echo "UUID=$EFI_UUID /boot/efi vfat nofail 0 1" >> /target/etc/fstab
+    if [ "$BOOT_TYPE" == "UEFI" ]; then
+        echo "UUID=$EFI_UUID /boot/efi vfat nofail 0 1" >> /target/etc/fstab
+    fi
 
     if [ "$INSTALL_TYPE" == 1 ]; then
         touch /target/etc/crypttab
@@ -438,11 +440,6 @@ if [ "$INSTALL_TYPE" != 2 ]; then
     echo "" >> /etc/crypttab
 fi
 
-wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
-
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-full.png -O /boot/grub/grub-full.png
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-wide.png -O /boot/grub/grub-wide.png
-
 systemctl daemon-reload
 
 # setup grub
@@ -450,15 +447,20 @@ systemctl daemon-reload
 if [ "$BOOT_TYPE" == "BIOS" ]; then
     apt install grub-pc -yy
     grub-install --target=i386-pc /dev/"$installDisk"
-    update-grub2
 else
     apt install grub-efi-amd64 -yy
     grub-install --target=x86_64-efi
     grub-install --target=x86_64-efi --removable
-    update-grub2
 fi
 
 update-initramfs -u -k all
+
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
+
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-full.png -O /boot/grub/grub-full.png
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-wide.png -O /boot/grub/grub-wide.png
+
+update-grub2
 
 # disable root account
 passwd -d root
