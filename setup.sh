@@ -11,7 +11,7 @@ echo "Verifying required packages..."
 apt update
 apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq playerctl
 
-echo " "
+clear
 
 echo "Welcome to the Thebian installer!"
 echo "Please select an installation option:"
@@ -43,13 +43,15 @@ until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 3 ]; do
     read -p "(1,2,3): " INSTALL_TYPE
 done
 
-echo " "
+clear
 
 read -p "Enter new username: " USER_NAME
+
 echo " "
 
 read -p "Enter new name for your PC (hostname): " HOST_NAME
-echo " "
+
+clear
 
 willWriteRandom="N"
 encryptPass=""
@@ -76,6 +78,8 @@ if [ "$INSTALL_TYPE" == 3 ]; then
 else
     availableDisks="$(lsblk -d | grep disk | cut -d' ' -f1)"
 
+    clear
+
     echo "Disks available to install to:"
     lsblk -d | grep disk | awk '{print $1" "$4}'
 
@@ -87,6 +91,8 @@ else
         read -p "Please type a selection from this list to install to: " installDisk
         installDisk="${installDisk// /}"
     done
+
+    clear
 
     echo "Selected disk /dev/${installDisk}"
 
