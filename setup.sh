@@ -455,6 +455,10 @@ fi
 
 update-initramfs -u -k all
 
+mkdir /boot/grub -p
+
+sleep 0.5
+
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
 
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-full.png -O /boot/grub/grub-full.png
