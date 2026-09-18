@@ -308,10 +308,12 @@ EEOF
     sleep 0.5
 
     mount /dev/disk/by-uuid/$BOOT_UUID /target/boot
-    mkdir -p /target/boot/efi
+    if [ "$BOOT_TYPE" == "UEFI" ]; then
+        mkdir -p /target/boot/efi
 
-    sleep 0.5
-    mount /dev/disk/by-uuid/$EFI_UUID /target/boot/efi
+        sleep 0.5
+        mount /dev/disk/by-uuid/$EFI_UUID /target/boot/efi
+    fi
 
     echo "" >> /target/etc/fstab
     echo "UUID=$BOOT_UUID /boot ext4 nofail 0 2" >> /target/etc/fstab
@@ -469,6 +471,8 @@ wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc
 
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-full.png -O /boot/grub/grub-full.png
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-wide.png -O /boot/grub/grub-wide.png
+
+sleep 0.5
 
 update-grub2
 
