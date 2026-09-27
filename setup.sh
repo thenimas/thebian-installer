@@ -463,6 +463,8 @@ fi
 
 update-initramfs -u -k all
 
+plymouth-set-default-theme -R spinner
+
 mkdir /boot/grub -p
 
 sleep 0.5
