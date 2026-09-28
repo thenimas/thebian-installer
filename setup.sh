@@ -11,7 +11,7 @@ echo "Verifying required packages..."
 apt update
 apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq playerctl
 
-echo " "
+clear
 
 echo "Welcome to the Thebian installer!"
 echo "Please select an installation option:"
