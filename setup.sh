@@ -11,7 +11,7 @@ echo "Verifying required packages..."
 apt update
 apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq playerctl
 
-echo " "
+clear
 
 echo "Welcome to the Thebian installer!"
 echo "Please select an installation option:"
@@ -34,19 +34,25 @@ if [[ "$CHASSIS" == "laptop" || "$CHASSIS" == "tablet" ]]; then
     IS_LAPTOP=1
 fi
 
+BOOT_TYPE="BIOS"
+if [ -d /sys/firmware/efi ]; then
+    BOOT_TYPE="UEFI"
+fi
+
 until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 3 ]; do
     read -p "(1,2,3): " INSTALL_TYPE
 done
 
-echo " "
+clear
 
 read -p "Enter new username: " USER_NAME
+
 echo " "
 
 read -p "Enter new name for your PC (hostname): " HOST_NAME
-echo " "
 
-willWriteRandom="N"
+clear
+
 encryptPass=""
 
 if [ "$INSTALL_TYPE" == 1 ]; then
@@ -68,12 +74,10 @@ if [ "$INSTALL_TYPE" == 3 ]; then
         echo "ERROR: /target not mounted!"
         exit 1
     fi
-    if ! cat /proc/mounts | grep -q "/target/boot/efi " ; then
-        echo "ERROR: /target/boot/efi not mounted!"
-        exit 1
-    fi
 else
     availableDisks="$(lsblk -d | grep disk | cut -d' ' -f1)"
+
+    clear
 
     echo "Disks available to install to:"
     lsblk -d | grep disk | awk '{print $1" "$4}'
@@ -86,6 +90,8 @@ else
         read -p "Please type a selection from this list to install to: " installDisk
         installDisk="${installDisk// /}"
     done
+
+    clear
 
     echo "Selected disk /dev/${installDisk}"
 
@@ -111,26 +117,28 @@ else
         exit 0
     fi
 
-    if [ "$INSTALL_TYPE" == 1 ]; then
-        echo "Would you like to write random data to disk? This will improve encryption strength, but may take time depending on disk speed. If you have done this step before repeating it is likely unecessary."
-        echo " "
-        willWriteRandom=" "
-        until [ "$willWriteRandom" == "Y" ] || [ "$willWriteRandom" == "N" ]; do
-            read -p "(Y,N): " willWriteRandom
-        done
-    fi
+    # if [ "$INSTALL_TYPE" == 1 ]; then
+    #     echo "Would you like to write random data to disk? This will improve encryption strength, but may take time depending on disk speed. If you have done this step before repeating it is likely unecessary."
+    #     echo " "
+    #     willWriteRandom=" "
+    #     until [ "$willWriteRandom" == "Y" ] || [ "$willWriteRandom" == "N" ]; do
+    #         read -p "(Y,N): " willWriteRandom
+    #     done
+    # fi
 
     IS_HDD="$(cat /sys/block/$installDisk/queue/rotational)"
 
     echo "Beginning installation..."
 
-    if [ "$willWriteRandom" == "Y" ]; then
-        dd if=/dev/urandom of=/dev/$installDisk bs=4M status=progress
-    else
-        dd if=/dev/zero of=/dev/$installDisk bs=4M count=1
-    fi
+    dd if=/dev/zero of=/dev/$installDisk bs=4M count=1
 
-    fdisk /dev/$installDisk <<EEOF
+    EFI_PART=""
+    BOOT_PART=""
+    ROOT_PART=""
+
+    if [ "$BOOT_TYPE" == "UEFI" ]; then
+
+        fdisk /dev/$installDisk <<EEOF
 g
 n
 
@@ -155,19 +163,43 @@ t
 w
 EEOF
 
-    sleep 0.5
+        sleep 0.5
 
-    EFI_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "0" '.blockdevices[0].children[$part].name')"
-    BOOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "1" '.blockdevices[0].children[$part].name')"
-    ROOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "2" '.blockdevices[0].children[$part].name')"
+        EFI_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "0" '.blockdevices[0].children[$part].name')"
+        BOOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "1" '.blockdevices[0].children[$part].name')"
+        ROOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "2" '.blockdevices[0].children[$part].name')"
 
-    dd if=/dev/zero of=/dev/$EFI_PART bs=4M count=1
+        dd if=/dev/zero of=/dev/$EFI_PART bs=4M count=1
+
+        sleep 0.5
+        mkfs.vfat -F 32 /dev/$EFI_PART
+    else
+
+        fdisk /dev/$installDisk <<EEOF
+o
+n
+p
+
+
++1G
+n
+p
+
+
+
+w
+EEOF
+
+    BOOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "0" '.blockdevices[0].children[$part].name')"
+    ROOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "1" '.blockdevices[0].children[$part].name')"
+
+    fi
+
     dd if=/dev/zero of=/dev/$BOOT_PART bs=4M count=1
     dd if=/dev/zero of=/dev/$ROOT_PART bs=4M count=1
 
     sleep 0.5
 
-    mkfs.vfat -F 32 /dev/$EFI_PART
     mkfs.ext4 /dev/$BOOT_PART
     
 
@@ -184,6 +216,9 @@ EEOF
 
         CRYPT_NAME="$ROOT_PART"_crypt;
         CRYPT_UUID="$(lsblk -no UUID /dev/$ROOT_PART)"
+
+        dd if=/dev/zero of=/dev/mapper/"$ROOT_PART"_crypt bs=4M status=progress
+
         mkfs.btrfs /dev/mapper/"$ROOT_PART"_crypt;
         sleep 0.5
         ROOT_UUID="$(lsblk -no UUID /dev/mapper/"$ROOT_PART"_crypt)"
@@ -251,8 +286,9 @@ EEOF
     mem="$( grep MemTotal /proc/meminfo | tr -s ' ' | cut -d ' ' -f2 )"
     sw_chunk="$(echo "scale=0 ; sqrt(($mem/1000000) + 1) / 4" | bc)"
     sw_size="$(echo "scale=0 ; $sw_chunk*4 + 4" | bc)"
+    sw_size="$(echo "scale=0 ; $sw_size*1024" | bc)"
 
-    dd if=/dev/zero of=/target/swap/swapfile bs=1G count=$sw_size status=progress
+    dd if=/dev/zero of=/target/swap/swapfile bs=1M count=$sw_size status=progress
     chmod 0600 /target/swap/swapfile
     btrfs balance start -v -dconvert=single /target/swap 
     mkswap /target/swap/swapfile
@@ -270,14 +306,18 @@ EEOF
     sleep 0.5
 
     mount /dev/disk/by-uuid/$BOOT_UUID /target/boot
-    mkdir -p /target/boot/efi
+    if [ "$BOOT_TYPE" == "UEFI" ]; then
+        mkdir -p /target/boot/efi
 
-    sleep 0.5
-    mount /dev/disk/by-uuid/$EFI_UUID /target/boot/efi
+        sleep 0.5
+        mount /dev/disk/by-uuid/$EFI_UUID /target/boot/efi
+    fi
 
     echo "" >> /target/etc/fstab
     echo "UUID=$BOOT_UUID /boot ext4 nofail 0 2" >> /target/etc/fstab
-    echo "UUID=$EFI_UUID /boot/efi vfat nofail 0 1" >> /target/etc/fstab
+    if [ "$BOOT_TYPE" == "UEFI" ]; then
+        echo "UUID=$EFI_UUID /boot/efi vfat nofail 0 1" >> /target/etc/fstab
+    fi
 
     if [ "$INSTALL_TYPE" == 1 ]; then
         touch /target/etc/crypttab
@@ -374,7 +414,7 @@ echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
 
 # installing packages
-apt install bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode ufw i3 kate fastfetch cryptsetup pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree systemsettings accountsservice sox libsox-fmt-all lshw firmware-linux linux-headers-amd64 krb5-locales grub-efi-amd64 xwallpaper apt-listchanges systemd-timesyncd -yy
+apt install bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode ufw i3 kate fastfetch cryptsetup pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree systemsettings accountsservice sox libsox-fmt-all lshw firmware-linux linux-headers-amd64 krb5-locales xwallpaper apt-listchanges systemd-timesyncd -yy
 
 apt install --no-install-suggests --no-install-recommends ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc fail2ban  breeze-cursor-theme geeqie libpam-winbind- apt-listbugs rkhunter lynis lxqt-policykit ffmpegthumbnailer avahi-utils gvfs-fuse xsettingsd system-config-printer -yy
 
@@ -406,23 +446,54 @@ if [ "$INSTALL_TYPE" != 2 ]; then
     echo "" >> /etc/crypttab
 fi
 
+systemctl daemon-reload
+
+# setup grub
+
+if [ "$BOOT_TYPE" == "BIOS" ]; then
+    apt install grub-pc -yy
+    grub-install --target=i386-pc /dev/"$installDisk"
+else
+    apt install grub-efi-amd64 -yy
+    grub-install --target=x86_64-efi
+    grub-install --target=x86_64-efi --removable
+fi
+
+EOT
+
+chroot /target /bin/bash << EOT
+update-initramfs -u -k all
+
+plymouth-set-default-theme -R spinner
+
+mkdir /boot/grub -p
+
+sleep 0.5
+
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
 
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-full.png -O /boot/grub/grub-full.png
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-wide.png -O /boot/grub/grub-wide.png
 
-systemctl daemon-reload
+EOT
 
-# setup grub
+sleep 0.5
 
-grub-install --target=x86_64-efi
-grub-install --target=x86_64-efi --removable
+chroot /target /bin/bash << EOT
+
 update-grub2
-update-initramfs -u -k all
+
+EOT
+
+chroot /target /bin/bash << EOT
 
 # disable root account
 passwd -d root
 passwd -l root
+
+EOT
+
+chroot /target /bin/bash << EOT
 
 # extra non-repository packages
 
@@ -496,7 +567,10 @@ if [ "$IS_LAPTOP" == 1 ]; then
     sed -i 's/# order += "battery all"/order += "battery all"/g' /target/home/"$USER_NAME"/.config/i3/i3status.conf
 
     chroot /target /bin/bash << EOT
-apt install --no-install-suggests --no-install-recommends bluez bluez-tools iw powertop wpa_supplicant brightnessctl -yy
+apt install --no-install-suggests --no-install-recommends bluez bluez-tools iw powertop wpasupplicant brightnessctl build-essential -yy
+
+usermod -aG video "$USER_NAME"
+usermod -aG input "$USER_NAME"
 
 cd /root
 
