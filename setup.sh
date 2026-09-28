@@ -567,7 +567,10 @@ if [ "$IS_LAPTOP" == 1 ]; then
     sed -i 's/# order += "battery all"/order += "battery all"/g' /target/home/"$USER_NAME"/.config/i3/i3status.conf
 
     chroot /target /bin/bash << EOT
-apt install --no-install-suggests --no-install-recommends bluez bluez-tools iw powertop wpa_supplicant brightnessctl -yy
+apt install --no-install-suggests --no-install-recommends bluez bluez-tools iw powertop wpasupplicant brightnessctl build-essential -yy
+
+usermod -aG video "$USER_NAME"
+usermod -aG input "$USER_NAME"
 
 cd /root
 
