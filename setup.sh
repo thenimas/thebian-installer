@@ -43,7 +43,7 @@ until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 3 ]; do
     read -p "(1,2,3): " INSTALL_TYPE
 done
 
-clear
+echo " "
 
 read -p "Enter new username: " USER_NAME
 echo " "
