@@ -53,7 +53,6 @@ read -p "Enter new name for your PC (hostname): " HOST_NAME
 
 clear
 
-willWriteRandom="N"
 encryptPass=""
 
 if [ "$INSTALL_TYPE" == 1 ]; then
@@ -118,24 +117,20 @@ else
         exit 0
     fi
 
-    if [ "$INSTALL_TYPE" == 1 ]; then
-        echo "Would you like to write random data to disk? This will improve encryption strength, but may take time depending on disk speed. If you have done this step before repeating it is likely unecessary."
-        echo " "
-        willWriteRandom=" "
-        until [ "$willWriteRandom" == "Y" ] || [ "$willWriteRandom" == "N" ]; do
-            read -p "(Y,N): " willWriteRandom
-        done
-    fi
+    # if [ "$INSTALL_TYPE" == 1 ]; then
+    #     echo "Would you like to write random data to disk? This will improve encryption strength, but may take time depending on disk speed. If you have done this step before repeating it is likely unecessary."
+    #     echo " "
+    #     willWriteRandom=" "
+    #     until [ "$willWriteRandom" == "Y" ] || [ "$willWriteRandom" == "N" ]; do
+    #         read -p "(Y,N): " willWriteRandom
+    #     done
+    # fi
 
     IS_HDD="$(cat /sys/block/$installDisk/queue/rotational)"
 
     echo "Beginning installation..."
 
-    if [ "$willWriteRandom" == "Y" ]; then
-        dd if=/dev/urandom of=/dev/$installDisk bs=4M status=progress
-    else
-        dd if=/dev/zero of=/dev/$installDisk bs=4M count=1
-    fi
+    dd if=/dev/zero of=/dev/$installDisk bs=4M count=1
 
     EFI_PART=""
     BOOT_PART=""
@@ -221,6 +216,9 @@ EEOF
 
         CRYPT_NAME="$ROOT_PART"_crypt;
         CRYPT_UUID="$(lsblk -no UUID /dev/$ROOT_PART)"
+
+        dd if=/dev/zero of=/dev/mapper/"$ROOT_PART"_crypt bs=4M status=progress
+
         mkfs.btrfs /dev/mapper/"$ROOT_PART"_crypt;
         sleep 0.5
         ROOT_UUID="$(lsblk -no UUID /dev/mapper/"$ROOT_PART"_crypt)"
