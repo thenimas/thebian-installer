@@ -1,14 +1,22 @@
 # thebian-installer
 Automatic setup script for my personal debian config.
-This is the headless branch, so there is no desktop environment.
+![Screenshot showing the debian desktop](assets/Screenshot_debian_2025-11-25_22:33:50.png)
 
 This script is intended to be run from a live environment. I recommend the Debian Live Standard ISO.
 https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/
 
+## Features
+- Automated installation with encryption support
+- i3 Window Manager preconfigured with my preferred bindings and visual configuration
+- Preinstalled utilites for coding, file syncing and snapshotting.
+- Support for up-to-date applications via Flatpak.
+
 ## Minimum Requirements
 - 64-bit Intel or AMD CPU
-- 1GB of available RAM
+- 2GB of available RAM
 - 16GB of disk space 
+- UEFI/GPT Booting
+  - Secure Boot is supported
 - Valid internet connection (for the installation)
 
 ## Usage

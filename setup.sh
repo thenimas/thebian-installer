@@ -46,6 +46,7 @@ done
 clear
 
 read -p "Enter new username: " USER_NAME
+
 echo " "
 
 read -p "Enter new name for your PC (hostname): " HOST_NAME
@@ -386,7 +387,7 @@ sleep 0.5
 
 mount -a
 
-wget https://github.com/thenimas/thebian-installer/raw/headless/configs/locale.conf -O /etc/locale.conf
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/locale.conf -O /etc/locale.conf
 
 # adding locale
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
@@ -413,12 +414,12 @@ echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
 
 # installing packages
-apt install btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel curl firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 grub-efi-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils -yy
+apt install bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode ufw i3 kate fastfetch cryptsetup pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree systemsettings accountsservice sox libsox-fmt-all lshw firmware-linux linux-headers-amd64 krb5-locales xwallpaper apt-listchanges systemd-timesyncd -yy
 
-apt install --no-install-suggests --no-install-recommends timeshift -yy
+apt install --no-install-suggests --no-install-recommends ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc fail2ban  breeze-cursor-theme geeqie libpam-winbind- apt-listbugs rkhunter lynis lxqt-policykit ffmpegthumbnailer avahi-utils gvfs-fuse xsettingsd system-config-printer -yy
 
-wget https://github.com/thenimas/thebian-installer/raw/headless/configs/timeshift.json -O /etc/timeshift/timeshift.json
-wget https://github.com/thenimas/thebian-installer/raw/headless/configs/jail.local -O /etc/fail2ban/jail.local
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift.json -O /etc/timeshift/timeshift.json
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/jail.local -O /etc/fail2ban/jail.local
 
 sed -i 's/ROOT_UUID/'"$ROOT_UUID"'/g' /etc/timeshift/timeshift.json
 sed -i 's/CRYPT_UUID/'"$CRYPT_UUID"'/g' /etc/timeshift/timeshift.json
@@ -444,12 +445,6 @@ if [ "$INSTALL_TYPE" != 2 ]; then
     echo "$crypttab_entry" | tr -d '\n'  >> /etc/crypttab
     echo "" >> /etc/crypttab
 fi
-
-wget https://github.com/thenimas/thebian-installer/raw/headless/configs/grub -O /etc/default/grub
-
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/headless/assets/grub-full.png -O /boot/grub/grub-full.png
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/headless/assets/grub-wide.png -O /boot/grub/grub-wide.png
-
 
 systemctl daemon-reload
 
@@ -502,19 +497,42 @@ chroot /target /bin/bash << EOT
 
 # extra non-repository packages
 
+wget -qO - https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/raw/master/pub.gpg | gpg --dearmor | dd of=/usr/share/keyrings/vscodium-archive-keyring.gpg
+echo "Types: deb
+URIs: https://download.vscodium.com/debs/
+Suites: vscodium
+Components: main
+Signed-By: /usr/share/keyrings/vscodium-archive-keyring.gpg
+Architectures: amd64
+" | tee /etc/apt/sources.list.d/vscodium.sources
+
+mkdir -p /etc/apt/keyrings
+curl -L -o /etc/apt/keyrings/syncthing-archive-keyring.gpg https://syncthing.net/release-key.gpg
+echo "Types: deb
+URIs: https://apt.syncthing.net/
+Suites: syncthing
+Components: stable-v2
+Signed-By: /etc/apt/keyrings/syncthing-archive-keyring.gpg
+" | tee /etc/apt/sources.list.d/syncthing.sources
+
+apt update
+apt install syncthing -yy
+apt install codium -yy
+
 # add firewall rules
 ufw default deny incoming
 ufw default allow outgoing
 ufw allow 80
 ufw allow 443
+ufw allow syncthing
 ufw enable
 
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 apt autoremove -yy
 
-wget https://github.com/thenimas/thebian-installer/raw/headless/configs/timeshift-boot -O /etc/cron.d/timeshift-boot
-wget https://github.com/thenimas/thebian-installer/raw/headless/configs/timeshift-hourly -O /etc/cron.d/timeshift-hourly
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-boot -O /etc/cron.d/timeshift-boot
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-hourly -O /etc/cron.d/timeshift-hourly
 
 EOT
 
@@ -529,13 +547,49 @@ usermod -aG sudo "$USER_NAME"
 passwd -d "$USER_NAME"
 passwd -e "$USER_NAME"
 
+wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
+tar -xf user.tar
+rsync -a ./user/* /home/"$USER_NAME"/
+rsync -a ./user/.* /home/"$USER_NAME"/
+rm -r user
+rm user.tar
+
 chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
+
+runuser "$USER_NAME" -c 'xdg-mime default thunar.desktop inode/directory application/x-gnome-saved-search'
+
+runuser "$USER_NAME" -c 'flatpak install net.waterfox.waterfox -y'
 
 EOT
 
+if [ "$IS_LAPTOP" == 1 ]; then
+    sed -i 's/# bindsym XF86MonBrightness/bindsym XF86MonBrightness/g' /target/home/"$USER_NAME"/.config/i3/config
+    sed -i 's/# order += "battery all"/order += "battery all"/g' /target/home/"$USER_NAME"/.config/i3/i3status.conf
+
+    chroot /target /bin/bash << EOT
+apt install --no-install-suggests --no-install-recommends bluez bluez-tools iw powertop wpasupplicant brightnessctl build-essential -yy
+
+usermod -aG video "$USER_NAME"
+usermod -aG input "$USER_NAME"
+
+cd /root
+
+git clone https://github.com/electrickite/batsignal.git
+cd batsignal
+make
+make install
+
+cd /
+rm -r /root/batsignal
+
+runuser "$USER_NAME" -c 'systemctl --user enable batsignal'
+
+EOT
+fi
+
 cd ~/
 
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/headless/assets/finish.mp3
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/finish.mp3
 play ~/finish.mp3
 
 echo ""
