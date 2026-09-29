@@ -9,7 +9,7 @@ fi
 
 echo "Verifying required packages..."
 apt update
-apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq playerctl
+apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq playerctl -yy
 
 clear
 
@@ -85,36 +85,35 @@ else
 
     installDisk="x"
 
-    until echo "$availableDisks" | grep -q "$installDisk" && [ -b /dev/$installDisk ] ; do
+    confirm=" "
+    
+    until [ $confirm = "YES" ]; then
+        until echo "$availableDisks" | grep -q "$installDisk" && [ -b /dev/$installDisk ] ; do
         read -p "Please type a selection from this list to install to: " installDisk
         installDisk="${installDisk// /}"
+        done
+
+        clear
+
+        echo "Selected disk /dev/${installDisk}"
+
+        echo " "
+
+        diskinfo="$(smartctl -a /dev/${installDisk})"
+
+        echo "$diskinfo" | grep Model
+        echo "$diskinfo" | grep Capacity
+        echo "$diskinfo" | grep Rotation
+        echo "$diskinfo" | grep "Version is:"
+        echo "$diskinfo" | grep "Version:"
+        echo "$diskinfo" | grep overall-health
+        echo " "
+
+        echo "REALLY INSTALL TO THIS DISK? THIS WILL OVERWRITE ALL DATA."
+        
+        read -p "Type YES in all capital letters to continue: " confirm
+        echo " "
     done
-
-    clear
-
-    echo "Selected disk /dev/${installDisk}"
-
-    echo " "
-
-    diskinfo="$(smartctl -a /dev/${installDisk})"
-
-    echo "$diskinfo" | grep Model
-    echo "$diskinfo" | grep Capacity
-    echo "$diskinfo" | grep Rotation
-    echo "$diskinfo" | grep "Version is:"
-    echo "$diskinfo" | grep "Version:"
-    echo "$diskinfo" | grep overall-health
-    echo " "
-
-    echo "REALLY INSTALL TO THIS DISK? THIS WILL OVERWRITE ALL DATA."
-    confirm=" "
-    read -p "Type YES in all capital letters to continue: " confirm
-    echo " "
-
-    if [ ! $confirm = "YES" ]; then
-        echo "Aborting."
-        exit 0
-    fi
 
     # if [ "$INSTALL_TYPE" == 1 ]; then
     #     echo "Would you like to write random data to disk? This will improve encryption strength, but may take time depending on disk speed. If you have done this step before repeating it is likely unecessary."
