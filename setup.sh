@@ -82,10 +82,9 @@ else
     lsblk -d | grep disk | awk '{print $1" "$4}'
 
     echo " "
-
     
-
     confirm=" "
+    installDisk="x"
     
     until [ $confirm == "YES" ]; do
         until echo "$availableDisks" | grep -q "$installDisk" && [ -b /dev/$installDisk ] ; do
