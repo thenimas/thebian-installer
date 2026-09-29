@@ -76,17 +76,17 @@ if [ "$INSTALL_TYPE" == 3 ]; then
 else
     availableDisks="$(lsblk -d | grep disk | cut -d' ' -f1)"
 
-    clear
-
-    echo "Disks available to install to:"
-    lsblk -d | grep disk | awk '{print $1" "$4}'
-
-    echo " "
-
     confirm=" "
     installDisk="x"
     
     until [ "$confirm" == "YES" ]; do
+        clear
+
+        echo "Disks available to install to:"
+        lsblk -d | grep disk | awk '{print $1" "$4}'
+
+        echo " "
+
         installDisk="x"
         until echo "$availableDisks" | grep -q "$installDisk" && [ -b /dev/$installDisk ] ; do
             read -p "Please type a selection from this list to install to: " installDisk
