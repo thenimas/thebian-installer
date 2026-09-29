@@ -21,7 +21,7 @@ echo "1. Install Debian to disk formatted with LUKS encryption (recommended)"
 echo "2. Install Debian without encryption"
 echo "3. Manual install to /target (advanced)"
 
-clear
+echo " "
 
 INSTALL_TYPE="0"
 
