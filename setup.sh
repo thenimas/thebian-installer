@@ -21,7 +21,7 @@ echo "1. Install Debian to disk formatted with LUKS encryption (recommended)"
 echo "2. Install Debian without encryption"
 echo "3. Manual install to /target (advanced)"
 
-clear
+echo " "
 
 INSTALL_TYPE="0"
 
@@ -43,7 +43,7 @@ until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 3 ]; do
     read -p "(1,2,3): " INSTALL_TYPE
 done
 
-echo " "
+clear
 
 read -p "Enter new username: " USER_NAME
 echo " "
