@@ -88,7 +88,7 @@ else
 
     confirm=" "
     
-    until [ $confirm = "YES" ]; then
+    until [ $confirm = "YES" ]; do
         until echo "$availableDisks" | grep -q "$installDisk" && [ -b /dev/$installDisk ] ; do
         read -p "Please type a selection from this list to install to: " installDisk
         installDisk="${installDisk// /}"
