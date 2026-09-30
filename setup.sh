@@ -69,25 +69,6 @@ if [ "$INSTALL_TYPE" == 1 ]; then
     echo " "
 fi 
 
-desktop_type=""
-until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 7 ]; do
-    desktop_type=""
-    clear
-    echo "Select desktop type:"
-    echo " "
-
-    echo "1. Thebian (custom i3)"
-    echo "2. KDE Plasma"
-    echo "3. Cinnamon"
-    echo "4. GNOME"
-    echo "5. MATE"
-    echo "6. LXQT"
-    echo "7. Headless (no desktop)"
-
-    echo " "
-    read -p "(1-7): " desktop_type
-done
-
 if [ "$INSTALL_TYPE" == 3 ]; then
     if ! cat /proc/mounts | grep -q "/target " ; then
         echo "ERROR: /target not mounted!"
