@@ -352,7 +352,32 @@ touch /target/etc/default/keyboard
 
 debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,keyboard-configuration,zstd,wget trixie /target http://deb.debian.org/debian
 
-PKGLIST=
+PKGLIST="btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel curl firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 grub-efi-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils"
+
+PKGLIST_NORECS="timeshift"
+
+if [ "DESKTOP_TYPE" != 1 ]; then
+    PKGLIST="${PKGLIST} flatpak gamemode fonts-recommended fonts-inconsolata fonts-cantarell plymouth plymouth-themes qdirstat virt-manager ttf-mscorefonts-installer vlc"
+fi
+if [ "$DESKTOP_TYPE" == 2 ]; then
+    PKGLIST="${PKGLIST} bluez i3 kate pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse rxvt-unicode thunar thunar-archive-plugin gvfs-backends x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm systemsettings sox libsox-fmt-all krb5-locales xwallpaper"
+    PKGLIST_NORECS="${PKGLIST_NORECS} ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc breeze-cursor-theme geeqie libpam-winbind- lxqt-policykit ffmpegthumbnailer gvfs-fuse xsettingsd system-config-printer"
+fi
+if [ "$DESKTOP_TYPE" == 3 ]; then
+    PKGLIST="${PKGLIST} task-kde-desktop plasma-discover-backend-flatpak"
+fi
+if [ "$DESKTOP_TYPE" == 4 ]; then
+    PKGLIST="${PKGLIST} task-cinnamon-desktop gnome-software-plugin-flatpak"
+fi
+if [ "$DESKTOP_TYPE" == 5 ]; then
+    PKGLIST="${PKGLIST} task-gnome-desktop gnome-software-plugin-flatpak"
+fi
+if [ "$DESKTOP_TYPE" == 6 ]; then
+    PKGLIST="${PKGLIST} task-mate-desktop"
+fi
+if [ "$DESKTOP_TYPE" == 7 ]; then
+    PKGLIST="${PKGLIST} task-lxqt-desktop"
+fi
 
 rm /target/etc/apt/sources.list
 
@@ -427,9 +452,9 @@ echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
 
 # installing packages
-apt install bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode ufw i3 kate fastfetch cryptsetup pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree systemsettings accountsservice sox libsox-fmt-all lshw firmware-linux linux-headers-amd64 krb5-locales xwallpaper apt-listchanges systemd-timesyncd -yy
+apt install "$PKGLIST" -yy
 
-apt install --no-install-suggests --no-install-recommends ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc fail2ban  breeze-cursor-theme geeqie libpam-winbind- apt-listbugs rkhunter lynis lxqt-policykit ffmpegthumbnailer avahi-utils gvfs-fuse xsettingsd system-config-printer -yy
+apt install --no-install-suggests --no-install-recommends "$PKGLIST_NORECS" -yy
 
 wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/timeshift.json -O /etc/timeshift/timeshift.json
 wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/jail.local -O /etc/fail2ban/jail.local
@@ -477,7 +502,9 @@ EOT
 chroot /target /bin/bash << EOT
 update-initramfs -u -k all
 
-plymouth-set-default-theme -R spinner
+if [ "$DESKTOP_TYPE" != 1 ]; then
+    plymouth-set-default-theme -R spinner
+fi
 
 mkdir /boot/grub -p
 
@@ -506,7 +533,9 @@ passwd -l root
 
 EOT
 
-chroot /target /bin/bash << EOT
+if [ "$DESKTOP_TYPE" != 1 ]; then
+
+    chroot /target /bin/bash << EOT
 
 # extra non-repository packages
 
@@ -547,7 +576,9 @@ apt autoremove -yy
 wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/timeshift-boot -O /etc/cron.d/timeshift-boot
 wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/timeshift-hourly -O /etc/cron.d/timeshift-hourly
 
+
 EOT
+fi
 
 ## STAGE 3
 
@@ -560,18 +591,25 @@ usermod -aG sudo "$USER_NAME"
 passwd -d "$USER_NAME"
 passwd -e "$USER_NAME"
 
-wget https://github.com/thenimas/thebian-installer/raw/chooser/user.tar -O user.tar
-tar -xf user.tar
-rsync -a ./user/* /home/"$USER_NAME"/
-rsync -a ./user/.* /home/"$USER_NAME"/
-rm -r user
-rm user.tar
+if [ "$DESKTOP_TYPE" == 2 ]; then
+
+    wget https://github.com/thenimas/thebian-installer/raw/chooser/user.tar -O user.tar
+    tar -xf user.tar
+    rsync -a ./user/* /home/"$USER_NAME"/
+    rsync -a ./user/.* /home/"$USER_NAME"/
+    rm -r user
+    rm user.tar
+fi
 
 chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
 
-runuser "$USER_NAME" -c 'xdg-mime default thunar.desktop inode/directory application/x-gnome-saved-search'
+if [ "$DESKTOP_TYPE" != 1]; then
+    runuser "$USER_NAME" -c 'xdg-mime default thunar.desktop inode/directory application/x-gnome-saved-search'
 
-runuser "$USER_NAME" -c 'flatpak install net.waterfox.waterfox -y'
+    runuser "$USER_NAME" -c 'flatpak install net.waterfox.waterfox -y'
+
+fi
+
 
 EOT
 
@@ -580,24 +618,15 @@ if [ "$IS_LAPTOP" == 1 ]; then
     sed -i 's/# order += "battery all"/order += "battery all"/g' /target/home/"$USER_NAME"/.config/i3/i3status.conf
 
     chroot /target /bin/bash << EOT
-apt install --no-install-suggests --no-install-recommends bluez bluez-tools iw powertop wpasupplicant brightnessctl build-essential -yy
+apt install --no-install-suggests --no-install-recommends bluez bluez-tools iw powertop wpasupplicant brightnessctl -yy
 
 usermod -aG video "$USER_NAME"
 usermod -aG input "$USER_NAME"
 
 cd /root
 
-git clone https://github.com/electrickite/batsignal.git
-cd batsignal
-make
-make install
-
-cd /
-rm -r /root/batsignal
-
-runuser "$USER_NAME" -c 'systemctl --user enable batsignal'
-
 EOT
+
 fi
 
 cd ~/
