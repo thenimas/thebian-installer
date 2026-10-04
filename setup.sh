@@ -69,9 +69,9 @@ if [ "$INSTALL_TYPE" == 1 ]; then
     echo " "
 fi 
 
-DESKTOP_TYPE=""
-until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 7 ]; do
-    DESKTOP_TYPE=""
+DESKTOP_TYPE="-1"
+until [ "$DESKTOP_TYPE" -ge 1 ] && [ "$DESKTOP_TYPE" -le 7 ]; do
+    DESKTOP_TYPE="-1"
     clear
     echo "Select desktop type:"
     echo " "
