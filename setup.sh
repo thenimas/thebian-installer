@@ -364,7 +364,7 @@ if [ "$DESKTOP_TYPE" == 2 ]; then
     PKGLIST_NORECS="${PKGLIST_NORECS} ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc breeze-cursor-theme geeqie libpam-winbind- lxqt-policykit ffmpegthumbnailer gvfs-fuse xsettingsd system-config-printer"
 fi
 if [ "$DESKTOP_TYPE" == 3 ]; then
-    PKGLIST="${PKGLIST} plasma-discover-backend-flatpak lightdm sddm- gimp hunspell-en-ca hyphen-en-ca kde-standard kdeaccessibility libreoffice-calc libreoffice-help-en-us libreoffice-impress libreoffice-kf6 libreoffice-plasma libreoffice-writer mythes-en-us orca print-manager"
+    PKGLIST="${PKGLIST} plasma-discover-backend-flatpak lightdm sddm- gimp hunspell-en-ca hyphen-en-us kde-standard kdeaccessibility libreoffice-calc libreoffice-help-en-us libreoffice-impress libreoffice-kf6 libreoffice-plasma libreoffice-writer mythes-en-us orca print-manager"
     PKGLIST_NORECS="${PKGLIST_NORECS} task-kde-desktop "
 fi
 if [ "$DESKTOP_TYPE" == 4 ]; then
