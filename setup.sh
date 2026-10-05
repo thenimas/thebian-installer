@@ -17,9 +17,15 @@ echo "Welcome to the Thebian installer!"
 echo "Please select an installation option:"
 echo " "
 
-echo "1. Install Debian to disk formatted with LUKS encryption (recommended)"
-echo "2. Install Debian without encryption"
-echo "3. Manual install to /target (advanced)"
+MODE="$1"
+if [[ "$MODE" == "--iso" ]]; then
+    echo "1. Install Debian to disk formatted with LUKS encryption (recommended)"
+    echo "2. Install Debian without encryption"
+else
+    echo "1. Install Debian to disk formatted with LUKS encryption (recommended)"
+    echo "2. Install Debian without encryption"
+    echo "3. Manual install to /target (advanced)"
+fi
 
 echo " "
 
@@ -39,9 +45,15 @@ if [ -d /sys/firmware/efi ]; then
     BOOT_TYPE="UEFI"
 fi
 
-until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 3 ]; do
-    read -p "(1,2,3): " INSTALL_TYPE
-done
+if [[ "$MODE" == "--iso" ]]; then
+    until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 2 ]; do
+        read -p "(1,2): " INSTALL_TYPE
+    done
+else
+    until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 3 ]; do
+        read -p "(1,2,3): " INSTALL_TYPE
+    done
+fi
 
 clear
 
@@ -383,26 +395,31 @@ fi
 rm /target/etc/apt/sources.list
 
 # Adding necessary cfgs
-sourcescfg="# Thebian installer sources list
-Types: deb deb-src
-URIs: http://deb.debian.org/debian/
-Suites: trixie
-Components: main contrib non-free-firmware
-Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+# set main repository
+if [[ "$MODE" != "--iso" ]]; then
+    netselect-apt -o /target/etc/apt/sources.list
+else
+    sourcescfg="# Thebian installer sources list
+    Types: deb deb-src
+    URIs: http://deb.debian.org/debian/
+    Suites: trixie
+    Components: main contrib non-free-firmware
+    Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
-Types: deb deb-src
-URIs: http://deb.debian.org/debian/
-Suites: trixie-updates
-Components: main contrib non-free-firmware
-Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+    Types: deb deb-src
+    URIs: http://deb.debian.org/debian/
+    Suites: trixie-updates
+    Components: main contrib non-free-firmware
+    Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
-Types: deb deb-src
-URIs: http://security.debian.org/debian-security/
-Suites: trixie-security
-Components: main contrib non-free-firmware
-Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
-"
-echo "$sourcescfg" > /target/etc/apt/sources.list.d/debian.sources
+    Types: deb deb-src
+    URIs: http://security.debian.org/debian-security/
+    Suites: trixie-security
+    Components: main contrib non-free-firmware
+    Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+    "
+    echo "$sourcescfg" > /target/etc/apt/sources.list.d/debian.sources
+fi
 
 keyboardcfg="# KEYBOARD CONFIGURATION FILE
 
@@ -532,13 +549,6 @@ chroot /target /bin/bash << EOT
 passwd -d root
 passwd -l root
 
-# set main repository
-
-netselect-apt -o /etc/apt/sources.list
-rm /etc/apt/sources.list.d/debian.sources
-apt modernize-sources --assume-yes
-apt update
-
 EOT
 
 if [ "$DESKTOP_TYPE" != 1 ]; then
@@ -631,6 +641,16 @@ cd /root
 EOT
 
 fi
+
+# STAGE 4 (cleanup)
+
+# set main repository
+chroot /target /bin/bash << EOT
+netselect-apt -o /etc/apt/sources.list
+rm /etc/apt/sources.list.d/debian.sources
+apt modernize-sources --assume-yes
+apt update
+EOT
 
 cd ~/
 
