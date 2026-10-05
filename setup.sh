@@ -350,21 +350,21 @@ mkdir -p /target/etc/apt/sources.list.d/
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
 
-debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,keyboard-configuration,zstd,wget,curl trixie /target http://deb.debian.org/debian
+debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,initramfs-tools,keyboard-configuration,zstd,wget,curl trixie /target http://deb.debian.org/debian
 
 PKGLIST="btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils"
 
 PKGLIST_NORECS="timeshift"
 
 if [ "DESKTOP_TYPE" != 1 ]; then
-    PKGLIST="${PKGLIST} flatpak gamemode fonts-recommended fonts-inconsolata fonts-cantarell plymouth plymouth-themes qdirstat virt-manager ttf-mscorefonts-installer vlc"
+    PKGLIST="${PKGLIST} flatpak gamemode fonts-recommended fonts-inconsolata fonts-cantarell plymouth plymouth-themes qdirstat virt-manager ttf-mscorefonts-installer vlc firefox-esr-5"
 fi
 if [ "$DESKTOP_TYPE" == 2 ]; then
     PKGLIST="${PKGLIST} bluez i3 kate pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse rxvt-unicode thunar thunar-archive-plugin gvfs-backends x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm systemsettings sox libsox-fmt-all krb5-locales xwallpaper"
     PKGLIST_NORECS="${PKGLIST_NORECS} ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc breeze-cursor-theme geeqie libpam-winbind- lxqt-policykit ffmpegthumbnailer gvfs-fuse xsettingsd system-config-printer"
 fi
 if [ "$DESKTOP_TYPE" == 3 ]; then
-    PKGLIST="${PKGLIST} task-kde-desktop plasma-discover-backend-flatpak"
+    PKGLIST="${PKGLIST} task-kde-desktop plasma-discover-backend-flatpak lightdm sddm-"
 fi
 if [ "$DESKTOP_TYPE" == 4 ]; then
     PKGLIST="${PKGLIST} task-cinnamon-desktop gnome-software-plugin-flatpak"
@@ -492,7 +492,7 @@ if [ "$BOOT_TYPE" == "BIOS" ]; then
     apt install grub-pc -yy
     grub-install --target=i386-pc /dev/"$installDisk"
 else
-    apt install grub-efi-amd64 -yy
+    apt install grub-efi-amd64 efibootmgr -yy
     grub-install --target=x86_64-efi
     grub-install --target=x86_64-efi --removable
 fi
