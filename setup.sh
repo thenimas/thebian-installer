@@ -358,10 +358,11 @@ PKGLIST_NORECS="timeshift"
 
 if [ "DESKTOP_TYPE" != 1 ]; then
     PKGLIST="${PKGLIST} flatpak gamemode fonts-recommended fonts-inconsolata fonts-cantarell plymouth plymouth-themes qdirstat virt-manager ttf-mscorefonts-installer vlc firefox-esr-"
+    PKGLIST_NORECS="${PKGLIST_NORECS} firefox-esr-"
 fi
 if [ "$DESKTOP_TYPE" == 2 ]; then
-    PKGLIST="${PKGLIST} bluez i3 kate pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse rxvt-unicode thunar thunar-archive-plugin gvfs-backends x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm systemsettings sox libsox-fmt-all krb5-locales xwallpaper"
-    PKGLIST_NORECS="${PKGLIST_NORECS} ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc breeze-cursor-theme geeqie libpam-winbind- lxqt-policykit ffmpegthumbnailer gvfs-fuse xsettingsd system-config-printer"
+    PKGLIST="${PKGLIST} bluez i3 kate pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse rxvt-unicode thunar thunar-archive-plugin gvfs-backends x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm systemsettings sox libsox-fmt-all krb5-locales xwallpaper sddm-"
+    PKGLIST_NORECS="${PKGLIST_NORECS} ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc breeze-cursor-theme geeqie libpam-winbind- lxqt-policykit ffmpegthumbnailer gvfs-fuse xsettingsd system-config-printer sddm-"
 fi
 if [ "$DESKTOP_TYPE" == 3 ]; then
     PKGLIST="${PKGLIST} plasma-discover-backend-flatpak lightdm gimp hunspell-en-ca hyphen-en-us kde-standard kdeaccessibility libreoffice-calc libreoffice-help-en-us libreoffice-impress libreoffice-kf6 libreoffice-plasma libreoffice-writer mythes-en-us orca print-manager"
