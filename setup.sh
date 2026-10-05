@@ -350,7 +350,7 @@ mkdir -p /target/etc/apt/sources.list.d/
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
 
-debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,initramfs-tools,keyboard-configuration,zstd,wget,curl trixie /target http://deb.debian.org/debian
+debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,initramfs-tools,keyboard-configuration,zstd,wget,curl,gpg trixie /target http://deb.debian.org/debian
 
 PKGLIST="btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils"
 
