@@ -622,7 +622,7 @@ chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
 
 if [ "$DESKTOP_TYPE" != 1 ]; then
     runuser "$USER_NAME" -c 'flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo'
-    runuser "$USER_NAME" -c 'flatpak install --user net.waterfox.waterfox -y'
+    # runuser "$USER_NAME" -c 'flatpak install --user net.waterfox.waterfox -y'
 fi
 EOT
 
