@@ -357,7 +357,7 @@ PKGLIST="btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel fir
 PKGLIST_NORECS="timeshift"
 
 if [ "DESKTOP_TYPE" != 1 ]; then
-    PKGLIST="${PKGLIST} flatpak gamemode fonts-recommended fonts-inconsolata fonts-cantarell plymouth plymouth-themes qdirstat virt-manager ttf-mscorefonts-installer vlc firefox-esr-5"
+    PKGLIST="${PKGLIST} flatpak gamemode fonts-recommended fonts-inconsolata fonts-cantarell plymouth plymouth-themes qdirstat virt-manager ttf-mscorefonts-installer vlc firefox-esr-"
 fi
 if [ "$DESKTOP_TYPE" == 2 ]; then
     PKGLIST="${PKGLIST} bluez i3 kate pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse rxvt-unicode thunar thunar-archive-plugin gvfs-backends x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm systemsettings sox libsox-fmt-all krb5-locales xwallpaper"
