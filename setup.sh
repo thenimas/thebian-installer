@@ -576,8 +576,6 @@ ufw allow 443
 ufw allow syncthing
 ufw enable
 
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-
 apt autoremove -yy
 
 wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/timeshift-boot -O /etc/cron.d/timeshift-boot
@@ -612,7 +610,8 @@ fi
 chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
 
 if [ "$DESKTOP_TYPE" != 1 ]; then
-    runuser "$USER_NAME" -c 'flatpak install net.waterfox.waterfox -y'
+    runuser "$USER_NAME" -c 'flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo'
+    runuser "$USER_NAME" -c 'flatpak install --user net.waterfox.waterfox -y'
 fi
 EOT
 
