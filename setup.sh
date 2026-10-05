@@ -352,7 +352,7 @@ touch /target/etc/default/keyboard
 
 debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,initramfs-tools,keyboard-configuration,zstd,wget,curl,gpg trixie /target http://deb.debian.org/debian
 
-PKGLIST="btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils"
+PKGLIST="btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils netselect-apt"
 
 PKGLIST_NORECS="timeshift"
 
@@ -384,13 +384,13 @@ rm /target/etc/apt/sources.list
 # Adding necessary cfgs
 sourcescfg="# Thebian installer sources list
 Types: deb deb-src
-URIs: http://mirror.dst.ca/debian/ http://deb.debian.org/debian/
+URIs: http://deb.debian.org/debian/
 Suites: trixie
 Components: main contrib non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
 Types: deb deb-src
-URIs: http://mirror.dst.ca/debian/ http://deb.debian.org/debian/
+URIs: http://deb.debian.org/debian/
 Suites: trixie-updates
 Components: main contrib non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
@@ -531,6 +531,13 @@ chroot /target /bin/bash << EOT
 passwd -d root
 passwd -l root
 
+# set main repository
+
+netselect-apt -o /etc/apt/sources.list
+rm /etc/apt/sources.list.d/debian.sources
+apt modernize-sources --assume-yes
+apt update
+
 EOT
 
 if [ "$DESKTOP_TYPE" != 1 ]; then
@@ -575,7 +582,6 @@ apt autoremove -yy
 
 wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/timeshift-boot -O /etc/cron.d/timeshift-boot
 wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/timeshift-hourly -O /etc/cron.d/timeshift-hourly
-
 
 EOT
 fi
