@@ -350,9 +350,9 @@ mkdir -p /target/etc/apt/sources.list.d/
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
 
-debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,keyboard-configuration,zstd,wget trixie /target http://deb.debian.org/debian
+debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,keyboard-configuration,zstd,wget,curl trixie /target http://deb.debian.org/debian
 
-PKGLIST="btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel curl firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 grub-efi-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils"
+PKGLIST="btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils"
 
 PKGLIST_NORECS="timeshift"
 
@@ -452,9 +452,9 @@ echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
 
 # installing packages
-apt install "$PKGLIST" -yy
+apt install $PKGLIST -yy
 
-apt install --no-install-suggests --no-install-recommends "$PKGLIST_NORECS" -yy
+apt install --no-install-suggests --no-install-recommends $PKGLIST_NORECS -yy
 
 wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/timeshift.json -O /etc/timeshift/timeshift.json
 wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/jail.local -O /etc/fail2ban/jail.local
@@ -599,18 +599,15 @@ if [ "$DESKTOP_TYPE" == 2 ]; then
     rsync -a ./user/.* /home/"$USER_NAME"/
     rm -r user
     rm user.tar
+
+    runuser "$USER_NAME" -c 'xdg-mime default thunar.desktop inode/directory application/x-gnome-saved-search'
 fi
 
 chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
 
-if [ "$DESKTOP_TYPE" != 1]; then
-    runuser "$USER_NAME" -c 'xdg-mime default thunar.desktop inode/directory application/x-gnome-saved-search'
-
+if [ "$DESKTOP_TYPE" != 1 ]; then
     runuser "$USER_NAME" -c 'flatpak install net.waterfox.waterfox -y'
-
 fi
-
-
 EOT
 
 if [ "$IS_LAPTOP" == 1 ]; then
