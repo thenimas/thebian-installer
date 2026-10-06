@@ -396,31 +396,26 @@ rm /target/etc/apt/sources.list
 
 # Adding necessary cfgs
 # set main repository
-if [[ "$MODE" != "--iso" ]]; then
-    netselect-apt -o /target/etc/apt/sources.list
-else
-    sourcescfg="# Thebian installer sources list
-    Types: deb deb-src
-    URIs: http://deb.debian.org/debian/
-    Suites: trixie
-    Components: main contrib non-free-firmware
-    Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+sourcescfg="# Thebian installer sources list
+Types: deb deb-src
+URIs: http://deb.debian.org/debian/
+Suites: trixie
+Components: main contrib non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
-    Types: deb deb-src
-    URIs: http://deb.debian.org/debian/
-    Suites: trixie-updates
-    Components: main contrib non-free-firmware
-    Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+Types: deb deb-src
+URIs: http://deb.debian.org/debian/
+Suites: trixie-updates
+Components: main contrib non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
-    Types: deb deb-src
-    URIs: http://security.debian.org/debian-security/
-    Suites: trixie-security
-    Components: main contrib non-free-firmware
-    Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
-    "
-    echo "$sourcescfg" > /target/etc/apt/sources.list.d/debian.sources
-fi
-
+Types: deb deb-src
+URIs: http://security.debian.org/debian-security/
+Suites: trixie-security
+Components: main contrib non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+"
+echo "$sourcescfg" > /target/etc/apt/sources.list.d/debian.sources
 keyboardcfg="# KEYBOARD CONFIGURATION FILE
 
 # Consult the keyboard(5) manual page.
