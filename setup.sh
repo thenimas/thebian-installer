@@ -368,7 +368,7 @@ PKGLIST="btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel fir
 
 PKGLIST_NORECS="timeshift"
 
-if [ "DESKTOP_TYPE" != 1 ]; then
+if [ "$DESKTOP_TYPE" != 1 ]; then
     PKGLIST="${PKGLIST} flatpak gamemode fonts-recommended fonts-inconsolata fonts-cantarell plymouth plymouth-themes qdirstat virt-manager ttf-mscorefonts-installer vlc firefox-esr-"
     PKGLIST_NORECS="${PKGLIST_NORECS} firefox-esr-"
 fi
