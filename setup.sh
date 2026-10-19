@@ -438,7 +438,7 @@ sleep 0.5
 
 mount -a
 
-wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/locale.conf -O /etc/locale.conf
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/locale.conf -O /etc/locale.conf
 
 # adding locale
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
@@ -469,8 +469,8 @@ apt install $PKGLIST -yy
 
 apt install --no-install-suggests --no-install-recommends $PKGLIST_NORECS -yy
 
-wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/timeshift.json -O /etc/timeshift/timeshift.json
-wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/jail.local -O /etc/fail2ban/jail.local
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift.json -O /etc/timeshift/timeshift.json
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/jail.local -O /etc/fail2ban/jail.local
 
 sed -i 's/ROOT_UUID/'"$ROOT_UUID"'/g' /etc/timeshift/timeshift.json
 sed -i 's/CRYPT_UUID/'"$CRYPT_UUID"'/g' /etc/timeshift/timeshift.json
@@ -523,10 +523,10 @@ mkdir /boot/grub -p
 
 sleep 0.5
 
-wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/grub -O /etc/default/grub
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
 
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/chooser/assets/grub-full.png -O /boot/grub/grub-full.png
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/chooser/assets/grub-wide.png -O /boot/grub/grub-wide.png
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-full.png -O /boot/grub/grub-full.png
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-wide.png -O /boot/grub/grub-wide.png
 
 EOT
 
@@ -584,8 +584,8 @@ ufw enable
 
 apt autoremove -yy
 
-wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/timeshift-boot -O /etc/cron.d/timeshift-boot
-wget https://github.com/thenimas/thebian-installer/raw/chooser/configs/timeshift-hourly -O /etc/cron.d/timeshift-hourly
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-boot -O /etc/cron.d/timeshift-boot
+wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-hourly -O /etc/cron.d/timeshift-hourly
 
 EOT
 fi
@@ -603,7 +603,7 @@ passwd -e "$USER_NAME"
 
 if [ "$DESKTOP_TYPE" == 2 ]; then
 
-    wget https://github.com/thenimas/thebian-installer/raw/chooser/user.tar -O user.tar
+    wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
     tar -xf user.tar
     rsync -a ./user/* /home/"$USER_NAME"/
     rsync -a ./user/.* /home/"$USER_NAME"/
@@ -646,10 +646,11 @@ rm /etc/apt/sources.list.d/debian.sources
 apt modernize-sources --assume-yes
 apt update
 EOT
+fi
 
 cd ~/
 
-wget https://raw.githubusercontent.com/thenimas/thebian-installer/chooser/assets/finish.mp3
+wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/finish.mp3
 play ~/finish.mp3
 
 echo ""
