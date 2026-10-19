@@ -17,9 +17,15 @@ echo "Welcome to the Thebian installer!"
 echo "Please select an installation option:"
 echo " "
 
-echo "1. Install Debian to disk formatted with LUKS encryption (recommended)"
-echo "2. Install Debian without encryption"
-echo "3. Manual install to /target (advanced)"
+MODE="$1"
+if [[ "$MODE" == "--iso" ]]; then
+    echo "1. Install Debian to disk formatted with LUKS encryption (recommended)"
+    echo "2. Install Debian without encryption"
+else
+    echo "1. Install Debian to disk formatted with LUKS encryption (recommended)"
+    echo "2. Install Debian without encryption"
+    echo "3. Manual install to /target (advanced)"
+fi
 
 echo " "
 
@@ -39,9 +45,15 @@ if [ -d /sys/firmware/efi ]; then
     BOOT_TYPE="UEFI"
 fi
 
-until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 3 ]; do
-    read -p "(1,2,3): " INSTALL_TYPE
-done
+if [[ "$MODE" == "--iso" ]]; then
+    until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 2 ]; do
+        read -p "(1,2): " INSTALL_TYPE
+    done
+else
+    until [ "$INSTALL_TYPE" -ge 1 ] && [ "$INSTALL_TYPE" -le 3 ]; do
+        read -p "(1,2,3): " INSTALL_TYPE
+    done
+fi
 
 clear
 
@@ -68,6 +80,25 @@ if [ "$INSTALL_TYPE" == 1 ]; then
     done
     echo " "
 fi 
+
+DESKTOP_TYPE="-1"
+until [ "$DESKTOP_TYPE" -ge 1 ] && [ "$DESKTOP_TYPE" -le 7 ]; do
+    DESKTOP_TYPE="-1"
+    clear
+    echo "Select desktop type:"
+    echo " "
+
+    echo "1. Headless (no desktop)"
+    echo "2. i3"
+    echo "3. KDE Plasma"
+    echo "4. Cinnamon"
+    echo "5. GNOME"
+    echo "6. MATE"
+    echo "7. LXQT"
+
+    echo " "
+    read -p "(1-7): " DESKTOP_TYPE
+done
 
 if [ "$INSTALL_TYPE" == 3 ]; then
     if ! cat /proc/mounts | grep -q "/target " ; then
@@ -331,20 +362,49 @@ mkdir -p /target/etc/apt/sources.list.d/
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
 
-debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,efibootmgr,initramfs-tools,keyboard-configuration,zstd,wget trixie /target http://deb.debian.org/debian
+debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,initramfs-tools,keyboard-configuration,zstd,wget,curl,gpg,netselect-apt trixie /target http://deb.debian.org/debian
+
+PKGLIST="btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils"
+
+PKGLIST_NORECS="timeshift"
+
+if [ "$DESKTOP_TYPE" != 1 ]; then
+    PKGLIST="${PKGLIST} flatpak gamemode fonts-recommended fonts-inconsolata fonts-cantarell plymouth plymouth-themes qdirstat virt-manager ttf-mscorefonts-installer vlc firefox-esr-"
+    PKGLIST_NORECS="${PKGLIST_NORECS} firefox-esr-"
+fi
+if [ "$DESKTOP_TYPE" == 2 ]; then
+    PKGLIST="${PKGLIST} bluez i3 kate pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse rxvt-unicode thunar thunar-archive-plugin gvfs-backends x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus systemsettings sox libsox-fmt-all krb5-locales xwallpaper"
+    PKGLIST_NORECS="${PKGLIST_NORECS} ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc breeze-cursor-theme geeqie libpam-winbind- lxqt-policykit ffmpegthumbnailer gvfs-fuse xsettingsd system-config-printer"
+fi
+if [ "$DESKTOP_TYPE" == 3 ]; then
+    PKGLIST="${PKGLIST} plasma-discover-backend-flatpak lightdm gimp hunspell-en-ca hyphen-en-us kde-standard kdeaccessibility libreoffice-calc libreoffice-help-en-us libreoffice-impress libreoffice-kf6 libreoffice-plasma libreoffice-writer mythes-en-us orca print-manager"
+fi
+if [ "$DESKTOP_TYPE" == 4 ]; then
+    PKGLIST="${PKGLIST} task-cinnamon-desktop gnome-software-plugin-flatpak"
+fi
+if [ "$DESKTOP_TYPE" == 5 ]; then
+    PKGLIST="${PKGLIST} task-gnome-desktop gnome-software-plugin-flatpak"
+fi
+if [ "$DESKTOP_TYPE" == 6 ]; then
+    PKGLIST="${PKGLIST} task-mate-desktop"
+fi
+if [ "$DESKTOP_TYPE" == 7 ]; then
+    PKGLIST="${PKGLIST} task-lxqt-desktop"
+fi
 
 rm /target/etc/apt/sources.list
 
 # Adding necessary cfgs
+# set main repository
 sourcescfg="# Thebian installer sources list
 Types: deb deb-src
-URIs: http://mirror.dst.ca/debian/ http://deb.debian.org/debian/
+URIs: http://deb.debian.org/debian/
 Suites: trixie
 Components: main contrib non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
 Types: deb deb-src
-URIs: http://mirror.dst.ca/debian/ http://deb.debian.org/debian/
+URIs: http://deb.debian.org/debian/
 Suites: trixie-updates
 Components: main contrib non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
@@ -356,7 +416,6 @@ Components: main contrib non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 "
 echo "$sourcescfg" > /target/etc/apt/sources.list.d/debian.sources
-
 keyboardcfg="# KEYBOARD CONFIGURATION FILE
 
 # Consult the keyboard(5) manual page.
@@ -406,9 +465,9 @@ echo "$HOST_NAME" > /etc/hostname
 hwclock --systohc
 
 # installing packages
-apt install bluez btrfs-progs gh git fonts-recommended fonts-inconsolata fonts-cantarell flatpak gamemode ufw i3 kate fastfetch cryptsetup pipewire pipewire-alsa pipewire-audio pipewire-jack pipewire-pulse plymouth plymouth-themes qdirstat virt-manager rxvt-unicode timeshift thunar thunar-archive-plugin gvfs-backends ttf-mscorefonts-installer vlc x11-xserver-utils xdg-desktop-portal xserver-xorg-core xclip playerctl xdotool pulseaudio-utils network-manager-gnome ibus lightdm tasksel curl firmware-misc-nonfree systemsettings accountsservice sox libsox-fmt-all lshw firmware-linux linux-headers-amd64 krb5-locales xwallpaper apt-listchanges systemd-timesyncd -yy
+apt install $PKGLIST -yy
 
-apt install --no-install-suggests --no-install-recommends ark gnome-software pavucontrol redshift-gtk lxappearance lxinput maim nodejs default-jdk python3 gdb bc fail2ban  breeze-cursor-theme geeqie libpam-winbind- apt-listbugs rkhunter lynis lxqt-policykit ffmpegthumbnailer avahi-utils gvfs-fuse xsettingsd system-config-printer -yy
+apt install --no-install-suggests --no-install-recommends $PKGLIST_NORECS -yy
 
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift.json -O /etc/timeshift/timeshift.json
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/jail.local -O /etc/fail2ban/jail.local
@@ -446,7 +505,7 @@ if [ "$BOOT_TYPE" == "BIOS" ]; then
     apt install grub-pc -yy
     grub-install --target=i386-pc /dev/"$installDisk"
 else
-    apt install grub-efi-amd64 -yy
+    apt install grub-efi-amd64 efibootmgr -yy
     grub-install --target=x86_64-efi
     grub-install --target=x86_64-efi --removable
 fi
@@ -456,7 +515,9 @@ EOT
 chroot /target /bin/bash << EOT
 update-initramfs -u -k all
 
-plymouth-set-default-theme -R spinner
+if [ "$DESKTOP_TYPE" != 1 ]; then
+    plymouth-set-default-theme -R spinner
+fi
 
 mkdir /boot/grub -p
 
@@ -485,7 +546,9 @@ passwd -l root
 
 EOT
 
-chroot /target /bin/bash << EOT
+if [ "$DESKTOP_TYPE" != 1 ]; then
+
+    chroot /target /bin/bash << EOT
 
 # extra non-repository packages
 
@@ -519,14 +582,13 @@ ufw allow 443
 ufw allow syncthing
 ufw enable
 
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-
 apt autoremove -yy
 
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-boot -O /etc/cron.d/timeshift-boot
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift-hourly -O /etc/cron.d/timeshift-hourly
 
 EOT
+fi
 
 ## STAGE 3
 
@@ -539,19 +601,24 @@ usermod -aG sudo "$USER_NAME"
 passwd -d "$USER_NAME"
 passwd -e "$USER_NAME"
 
-wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
-tar -xf user.tar
-rsync -a ./user/* /home/"$USER_NAME"/
-rsync -a ./user/.* /home/"$USER_NAME"/
-rm -r user
-rm user.tar
+if [ "$DESKTOP_TYPE" == 2 ]; then
+
+    wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
+    tar -xf user.tar
+    rsync -a ./user/* /home/"$USER_NAME"/
+    rsync -a ./user/.* /home/"$USER_NAME"/
+    rm -r user
+    rm user.tar
+
+    runuser "$USER_NAME" -c 'xdg-mime default thunar.desktop inode/directory application/x-gnome-saved-search'
+fi
 
 chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
 
-runuser "$USER_NAME" -c 'xdg-mime default thunar.desktop inode/directory application/x-gnome-saved-search'
-
-runuser "$USER_NAME" -c 'flatpak install net.waterfox.waterfox -y'
-
+if [ "$DESKTOP_TYPE" != 1 ]; then
+    runuser "$USER_NAME" -c 'flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo'
+    # runuser "$USER_NAME" -c 'flatpak install --user net.waterfox.waterfox -y'
+fi
 EOT
 
 if [ "$IS_LAPTOP" == 1 ]; then
@@ -559,23 +626,25 @@ if [ "$IS_LAPTOP" == 1 ]; then
     sed -i 's/# order += "battery all"/order += "battery all"/g' /target/home/"$USER_NAME"/.config/i3/i3status.conf
 
     chroot /target /bin/bash << EOT
-apt install --no-install-suggests --no-install-recommends bluez bluez-tools iw powertop wpasupplicant brightnessctl build-essential -yy
+apt install --no-install-suggests --no-install-recommends bluez bluez-tools iw powertop wpasupplicant brightnessctl -yy
 
 usermod -aG video "$USER_NAME"
 usermod -aG input "$USER_NAME"
 
 cd /root
 
-git clone https://github.com/electrickite/batsignal.git
-cd batsignal
-make
-make install
+EOT
 
-cd /
-rm -r /root/batsignal
+fi
 
-runuser "$USER_NAME" -c 'systemctl --user enable batsignal'
+# STAGE 4 (cleanup)
 
+# set main repository
+chroot /target /bin/bash << EOT
+netselect-apt -o /etc/apt/sources.list
+rm /etc/apt/sources.list.d/debian.sources
+apt modernize-sources --assume-yes
+apt update
 EOT
 fi
 
