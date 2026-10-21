@@ -9,7 +9,7 @@ fi
 
 echo "Verifying required packages..."
 apt update
-apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq playerctl -yy
+apt install fdisk bc rsync btrfs-progs tar wget lshw smartmontools cryptsetup debootstrap dosfstools jq playerctl netselect-apt -yy
 
 clear
 
@@ -355,6 +355,10 @@ fi
 
 ## STAGE 2
 
+cd /
+netselect-apt
+apt_server="$(cat sources.list | grep -o -P '(?<=deb http://).*(?=/debian/ stable main contrib)')"
+
 cd /target
 
 # Make dummy files
@@ -362,7 +366,7 @@ mkdir -p /target/etc/apt/sources.list.d/
 mkdir -p /target/etc/default
 touch /target/etc/default/keyboard
 
-debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,initramfs-tools,keyboard-configuration,zstd,wget,curl,gpg,netselect-apt trixie /target http://deb.debian.org/debian
+debootstrap --arch=amd64 --include=locales,locales-all,util-linux-extra,linux-image-amd64,dbus,ca-certificates,locales,man-db,sudo,nano,initramfs-tools,keyboard-configuration,zstd,wget,curl,gpg,netselect-apt trixie /target http://${apt_server}4/debian
 
 PKGLIST="btrfs-progs gh git ufw fastfetch cryptsetup network-manager tasksel firmware-misc-nonfree accountsservice lshw firmware-linux linux-headers-amd64 apt-listchanges systemd-timesyncd fail2ban apt-listbugs rkhunter lynis avahi-utils"
 
@@ -398,13 +402,13 @@ rm /target/etc/apt/sources.list
 # set main repository
 sourcescfg="# Thebian installer sources list
 Types: deb deb-src
-URIs: http://deb.debian.org/debian/
+URIs: http://${apt_server}/debian/
 Suites: trixie
 Components: main contrib non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 
 Types: deb deb-src
-URIs: http://deb.debian.org/debian/
+URIs: http://${apt_server}/debian/
 Suites: trixie-updates
 Components: main contrib non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
@@ -640,13 +644,13 @@ fi
 # STAGE 4 (cleanup)
 
 # set main repository
-chroot /target /bin/bash << EOT
-netselect-apt -o /etc/apt/sources.list
-rm /etc/apt/sources.list.d/debian.sources
-apt modernize-sources --assume-yes
-apt update
-EOT
-fi
+# chroot /target /bin/bash << EOT
+# netselect-apt -o /etc/apt/sources.list
+# rm /etc/apt/sources.list.d/debian.sources
+# apt modernize-sources --assume-yes
+# apt update
+# EOT
+# fi
 
 cd ~/
 
