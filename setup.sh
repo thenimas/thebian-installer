@@ -170,12 +170,25 @@ else
     BOOT_PART=""
     ROOT_PART=""
 
-    read -r ROWS COLS <<<$(stty size)
-    res_x="$(echo "scale=0 ; $COLS*8" | bc)"
-    res_y="$(echo "scale=0 ; (3*$res_x)/4" | bc)"
-    screen_type="FULL"
+    aspect_ratio=""
 
-    aspect_ratio="$(echo "scale=3 ; $res_x / ($ROWS*16)" | bc)"
+    if [ -x "$(command -v xdpyinfo)" ] ; then
+        echo "xdpyinfo detected"
+        dimensions="$(xdpyinfo | grep dimensions | sed -r 's/^[^0-9]*([0-9]+x[0-9]+).*$/\1/')"
+        res_x="$(echo $dimensions | sed -r 's/x.*//')"
+        res_y="$(echo "scale=0 ; (3*$res_x)/4" | bc)"
+        screen_type="FULL"
+        height="$(echo $dimensions| sed -r 's/.*x//')"
+
+        aspect_ratio="$(echo "scale=3 ; $res_x / $height" | bc)"
+    else
+        read -r ROWS COLS <<<$(stty size)
+        res_x="$(echo "scale=0 ; $COLS*8" | bc)"
+        res_y="$(echo "scale=0 ; (3*$res_x)/4" | bc)"
+        screen_type="FULL"
+
+        aspect_ratio="$(echo "scale=3 ; $res_x / ($ROWS*16)" | bc)"
+    fi
 
     if [ $(echo "$aspect_ratio > 1.416" | bc) -eq 1 ]; then
         screen_type="WIDE"
@@ -183,7 +196,7 @@ else
     fi
 
     echo "Assuming resolution $res_x x $res_y"
-
+    
     if [ "$BOOT_TYPE" == "UEFI" ]; then
 
         fdisk /dev/$installDisk <<EEOF
