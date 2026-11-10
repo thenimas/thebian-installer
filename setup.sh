@@ -549,6 +549,7 @@ fi
 EOT
 
 chroot /target /bin/bash << EOT
+echo zstd >> /sys/module/zswap/parameters/compressor
 update-initramfs -u -k all
 
 if [ "$DESKTOP_TYPE" != 1 ]; then
@@ -644,7 +645,7 @@ passwd -e "$USER_NAME"
 
 if [ "$DESKTOP_TYPE" == 2 ]; then
 
-    wget https://github.com/thenimas/thebian-installer/raw/main/user.tar -O user.tar
+    wget https://github.com/thenimas/thebian-installer/raw/main/user/i3user.tar -O user.tar
     tar -xf user.tar
     rsync -a ./user/* /home/"$USER_NAME"/
     rsync -a ./user/.* /home/"$USER_NAME"/
@@ -652,6 +653,18 @@ if [ "$DESKTOP_TYPE" == 2 ]; then
     rm user.tar
 
     runuser "$USER_NAME" -c 'xdg-mime default thunar.desktop inode/directory application/x-gnome-saved-search'
+fi
+
+if [ "$DESKTOP_TYPE" == 3 ]; then
+
+    wget https://github.com/thenimas/thebian-installer/raw/main/user/kdeuser.tar -O user.tar
+    tar -xf user.tar
+    rsync -a ./user/* /home/"$USER_NAME"/
+    rsync -a ./user/.* /home/"$USER_NAME"/
+    rm -r user
+    rm user.tar
+
+    sed -i 's/USER_NAME/'"$USER_NAME"'/g' /target/home/"$USER_NAME"/.config/plasma-org.kde.plasma.desktop-appletsrc
 fi
 
 chown "$USER_NAME":"$USER_NAME" /home/"$USER_NAME" -R
