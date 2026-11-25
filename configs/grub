@@ -32,6 +32,6 @@ GRUB_BACKGROUND=/boot/grub/grub-full.png
 #GRUB_DISABLE_RECOVERY="true"
 
 # Uncomment to get a beep at grub start
-GRUB_INIT_TUNE="640 440 1 330 1 277 1 880 1"
+# GRUB_INIT_TUNE="640 440 1 330 1 277 1 880 1"
 
 GRUB_DISABLE_OS_PROBER=false

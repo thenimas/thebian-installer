@@ -167,7 +167,6 @@ else
     dd if=/dev/zero of=/dev/$installDisk bs=4M count=1
 
     EFI_PART=""
-    BOOT_PART=""
     ROOT_PART=""
 
     aspect_ratio=""
@@ -204,16 +203,9 @@ g
 n
 
 
-+128M
++512M
 t
 1
-n
-
-
-+1G
-t
-2
-142
 n
 
 
@@ -227,8 +219,7 @@ EEOF
         sleep 0.5
 
         EFI_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "0" '.blockdevices[0].children[$part].name')"
-        BOOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "1" '.blockdevices[0].children[$part].name')"
-        ROOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "2" '.blockdevices[0].children[$part].name')"
+        ROOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "1" '.blockdevices[0].children[$part].name')"
 
         dd if=/dev/zero of=/dev/$EFI_PART bs=4M count=1
 
@@ -242,27 +233,17 @@ n
 p
 
 
-+1G
-n
-p
-
-
 
 w
 EEOF
 
-    BOOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "0" '.blockdevices[0].children[$part].name')"
-    ROOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "1" '.blockdevices[0].children[$part].name')"
+    ROOT_PART="$(lsblk -J "/dev/$installDisk" | jq -r --argjson part "0" '.blockdevices[0].children[$part].name')"
 
     fi
 
-    dd if=/dev/zero of=/dev/$BOOT_PART bs=4M count=1
     dd if=/dev/zero of=/dev/$ROOT_PART bs=4M count=1
 
     sleep 0.5
-
-    mkfs.ext4 /dev/$BOOT_PART
-    
 
     CRYPT_UUID=""
     ROOT_UUID=""
@@ -292,7 +273,6 @@ EEOF
     sleep 0.5
 
     EFI_UUID="$(lsblk -no UUID /dev/$EFI_PART)"
-    BOOT_UUID="$(lsblk -no UUID /dev/$BOOT_PART)"
 
     mkdir -p /target
     echo "$ROOT_UUID"
@@ -359,7 +339,6 @@ EEOF
 
     sleep 0.5
 
-    mount /dev/disk/by-uuid/$BOOT_UUID /target/boot
     if [ "$BOOT_TYPE" == "UEFI" ]; then
         mkdir -p /target/boot/efi
 
@@ -368,7 +347,6 @@ EEOF
     fi
 
     echo "" >> /target/etc/fstab
-    echo "UUID=$BOOT_UUID /boot ext4 nofail 0 2" >> /target/etc/fstab
     if [ "$BOOT_TYPE" == "UEFI" ]; then
         echo "UUID=$EFI_UUID /boot/efi vfat nofail 0 1" >> /target/etc/fstab
     fi
