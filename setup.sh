@@ -486,9 +486,6 @@ apt install --no-install-suggests --no-install-recommends $PKGLIST_NORECS -yy
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/timeshift.json -O /etc/timeshift/timeshift.json
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/jail.local -O /etc/fail2ban/jail.local
 
-sed -i 's/ROOT_UUID/'"$ROOT_UUID"'/g' /etc/timeshift/timeshift.json
-sed -i 's/CRYPT_UUID/'"$CRYPT_UUID"'/g' /etc/timeshift/timeshift.json
-
 if lshw -class network | grep -q "wireless"; then
     apt install firmware-iwlwifi -yy
 fi
@@ -513,17 +510,6 @@ fi
 
 systemctl daemon-reload
 
-# setup grub
-
-if [ "$BOOT_TYPE" == "BIOS" ]; then
-    apt install grub-pc -yy
-    grub-install --target=i386-pc /dev/"$installDisk"
-else
-    apt install grub-efi-amd64 efibootmgr -yy
-    grub-install --target=x86_64-efi
-    grub-install --target=x86_64-efi --removable
-fi
-
 EOT
 
 chroot /target /bin/bash << EOT
@@ -538,6 +524,8 @@ mkdir /boot/grub -p
 
 sleep 0.5
 
+# setup grub
+
 wget https://github.com/thenimas/thebian-installer/raw/main/configs/grub -O /etc/default/grub
 
 wget https://raw.githubusercontent.com/thenimas/thebian-installer/main/assets/grub-full.png -O /boot/grub/grub-full.png
@@ -547,6 +535,18 @@ sed -i "s|1024x768|${res_x}x${res_y}|g" /target/etc/default/grub
 if [ "$SCREEN_TYPE" == "WIDE" ]; then
     sed -i "s|grub-full.png|grub-wide.png|g" /target/etc/default/grub
 fi
+
+if [ "$BOOT_TYPE" == "BIOS" ]; then
+    apt install grub-pc -yy
+    grub-install --target=i386-pc /dev/"$installDisk"
+else
+    apt install grub-efi-amd64 efibootmgr -yy
+    grub-install --target=x86_64-efi
+    grub-install --target=x86_64-efi --removable
+fi
+
+sed -i "s|ROOT_UUID|${ROOT_UUID}|g" /etc/timeshift/timeshift.json
+sed -i "s|CRYPT_UUID|${CRYPT_UUID}|g" /etc/timeshift/timeshift.json
 
 EOT
 
